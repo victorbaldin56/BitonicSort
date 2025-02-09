@@ -1,0 +1,12 @@
+{
+    "version": 6,
+    "configurePresets": [
+      {
+        "name": "benchmark",
+        "displayName": "Optimized build with -O2 for benchmark",
+        "cacheVariables": {
+          "CMAKE_CXX_FLAGS": "-O2 --std=c++11 -DBENCHMARK -DSELFCHECK"
+        }
+      }
+    ]
+}
