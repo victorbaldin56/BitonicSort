@@ -19,8 +19,8 @@ TEST(bitonic, test) {
 
 int main() {
   int n;
-#if defined(BENCHMARK ) || defined(SELFCHECK)
-  n = kDataSize;
+#if defined(BENCHMARK) || defined(SELFCHECK)
+  n = ocl::kDataSize;
 #else
   n = *std::istream_iterator<int>(std::cin);
 #endif

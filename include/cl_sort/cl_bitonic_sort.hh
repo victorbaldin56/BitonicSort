@@ -25,7 +25,7 @@
 namespace ocl {
 
 constexpr std::size_t kLocalSize = 1;
-constexpr std::size_t kDataSize = 1000000;
+constexpr std::size_t kDataSize = 10000000;
 
 struct Config {
   const char* path_ = "bitonic_sort.cl";
@@ -41,18 +41,19 @@ class App final {
   std::string kernel_;
 
   static cl::Platform selectPlatform();
-  static cl::Context getGpuContext(cl_platform_id pid);
-  static std::string readFile(const char* path);
+  static cl::Context getGpuContext(cl::Platform pl);
+  static std::string readKernelFromFile(const char* path);
 
-  using bitonicSortT = cl::KernelFunctor<cl::Buffer, cl_ulong>;
+  using bitonicSortT
+      = cl::KernelFunctor<cl::Buffer, cl::LocalSpaceArg, cl_ulong>;
 
  public:
   App(Config cfg = {})
       : pl_(selectPlatform()),
-        ctx_(getGpuContext(pl_())),
+        ctx_(getGpuContext(pl_)),
         queue_(ctx_, cfg.queue_props_),
         cfg_(cfg),
-        kernel_(readFile(cfg.path_)) {}
+        kernel_(readKernelFromFile(cfg.path_)) {}
 
   cl::Event bitonicSort(TYPE* data, std::size_t sz);
 };
