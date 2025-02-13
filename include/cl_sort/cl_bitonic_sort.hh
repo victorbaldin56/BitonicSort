@@ -17,15 +17,9 @@
 
 #include "CL/opencl.hpp"
 
-// no another way
-#ifndef TYPE
-#define TYPE int
-#endif
-
 namespace ocl {
 
-constexpr std::size_t kLocalSize = 1;
-constexpr std::size_t kDataSize = 10000000;
+constexpr std::size_t kLocalSize = 16;
 
 struct Config {
   const char* path_ = "bitonic_sort.cl";
@@ -35,13 +29,15 @@ struct Config {
 
 class App final {
   cl::Platform pl_;
+  cl::Device dev_;
   cl::Context ctx_;
   cl::CommandQueue queue_;
   Config cfg_;
   std::string kernel_;
 
   static cl::Platform selectPlatform();
-  static cl::Context getGpuContext(cl::Platform pl);
+  static cl::Device selectDevice(cl::Platform pl);
+  static cl::Context getGpuContext(cl::Device dev);
   static std::string readKernelFromFile(const char* path);
 
   using bitonicSortT
@@ -50,12 +46,13 @@ class App final {
  public:
   App(Config cfg = {})
       : pl_(selectPlatform()),
-        ctx_(getGpuContext(pl_)),
-        queue_(ctx_, cfg.queue_props_),
+        dev_(selectDevice(pl_)),
+        ctx_(getGpuContext(dev_)),
+        queue_(ctx_, dev_, 0),
         cfg_(cfg),
         kernel_(readKernelFromFile(cfg.path_)) {}
 
-  cl::Event bitonicSort(TYPE* data, std::size_t sz);
+  cl::Event bitonicSort(int* data, std::size_t sz);
 };
 
 } // namespace ocl

@@ -2,36 +2,33 @@
 
 namespace {
 
+constexpr std::size_t kDataSize = 0x10;
+
 template <typename It>
-void randomFill(It start, It end, TYPE low, TYPE high) {
+void randomFill(It start, It end, int low, int high) {
   static std::mt19937_64 mt;
   std::uniform_int_distribution<int> dist(low, high);
-  std::for_each(start, end, [&dist](TYPE& v){ v = dist(mt); });
+  std::for_each(start, end, [&dist](int& v){ v = dist(mt); });
 }
 
 } // helpers
 
-#ifdef TESTING
-TEST(bitonic, test) {
-
-}
-#endif
-
 int main() {
-  int n;
+  std::size_t n;
 #if defined(BENCHMARK) || defined(SELFCHECK)
-  n = ocl::kDataSize;
+  n = kDataSize;
 #else
   n = *std::istream_iterator<int>(std::cin);
 #endif
 
-  std::vector<TYPE> data(n);
+  std::vector<int> data_for_gpu(n);
 
   // for benchmark or functionality test we choose random data
 #if defined(BENCHMARK) || defined(SELFCHECK)
-  randomFill(data.begin(), data.end(), -1000000, 1000000);
+  randomFill(data_for_gpu.begin(), data_for_gpu.end(), -100, 100);
 #else
-  std::copy_n(std::istream_iterator<TYPE>(std::cin), n, data.begin());
+  std::copy_n(std::istream_iterator<int>(std::cin), n, data.begin());
+
 #endif
 
 #ifdef BENCHMARK
@@ -40,8 +37,8 @@ int main() {
 #endif
 
 #if defined(BENCHMARK) || defined(SELFCHECK)
-  std::vector copy(data);
-  std::sort(copy.begin(), copy.end());
+  std::vector data_for_cpu(data_for_gpu);
+  std::sort(data_for_cpu.begin(), data_for_cpu.end());
 #endif
 
 #ifdef BENCHMARK
@@ -54,7 +51,7 @@ int main() {
 
   // sorting with OpenCL
   ocl::App app;
-  auto evt = app.bitonicSort(data.data(), data.size());
+  auto evt = app.bitonicSort(data_for_gpu.data(), data_for_gpu.size());
 
 #ifdef BENCHMARK
   cl_ulong gpu_start, gpu_end;
@@ -65,8 +62,17 @@ int main() {
 #endif
 
 #ifdef SELFCHECK
-  if (data != copy) {
-    throw std::runtime_error("SELFCHECK FAILED");
+  if (data_for_gpu != data_for_cpu) {
+    std::cerr << "Selfcheck failed\n"
+              << "Expected: ";
+    std::copy(data_for_cpu.begin(), data_for_cpu.end(),
+              std::ostream_iterator<int>(std::cerr, " "));
+    std::cerr << "\n"
+              << "Got: ";
+    std::copy(data_for_gpu.begin(), data_for_gpu.end(),
+              std::ostream_iterator<int>(std::cerr, " "));
+    std::cerr << "\n";
+    return EXIT_FAILURE;
   }
 #endif
 
