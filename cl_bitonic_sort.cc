@@ -85,12 +85,13 @@ cl::Context BitonicSorter::getGpuContext(cl::Device dev) {
   return cl::Context(dev);
 }
 
-std::string BitonicSorter::readKernelFromFile(const char *path) {
+std::string BitonicSorter::readKernelFromFile(
+    const std::filesystem::path& path) {
   auto code = std::string();
   auto shader_file = std::ifstream();
   shader_file.open(path);
   if (!shader_file.is_open()) {
-    std::string what = std::string("Failed to open file ") + path;
+    std::string what = std::string("Failed to open file ") + path.string();
     throw std::runtime_error(what);
   }
   auto shader_stream = std::stringstream();

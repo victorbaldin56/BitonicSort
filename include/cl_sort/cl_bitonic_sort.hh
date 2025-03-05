@@ -4,6 +4,7 @@
 #include <chrono>
 #include <random>
 #include <iostream>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 
@@ -20,7 +21,9 @@
 namespace ocl {
 
 struct Config {
-  const char* path_ = "bitonic_sort.cl";
+  std::filesystem::path path_ =
+      std::filesystem::absolute(__FILE__).parent_path()
+          .append("bitonic_sort.cl");
   cl::QueueProperties queue_props_ =
       cl::QueueProperties::Profiling | cl::QueueProperties::OutOfOrder;
 };
@@ -47,7 +50,7 @@ class BitonicSorter final {
   static cl::Platform selectPlatform();
   static cl::Device selectDevice(cl::Platform pl);
   static cl::Context getGpuContext(cl::Device dev);
-  static std::string readKernelFromFile(const char* path);
+  static std::string readKernelFromFile(const std::filesystem::path& path);
 
  private:  // helpers
   static void prepareData(std::vector<int>& data);
