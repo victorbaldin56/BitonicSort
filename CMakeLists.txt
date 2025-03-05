@@ -4,7 +4,7 @@ project(BitonicSort)
 find_package(OpenCL REQUIRED)
 find_package(OpenCLHeadersCpp REQUIRED)
 
-add_executable(bitonic cl_bitonic_sort.cc main.cc)
+add_executable(bitonic src/cl_bitonic_sort.cc src/main.cc)
 
 target_include_directories(bitonic PRIVATE include)
 target_compile_features(bitonic PRIVATE cxx_std_17)
