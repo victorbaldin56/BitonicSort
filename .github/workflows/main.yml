@@ -32,7 +32,7 @@ jobs:
       run: |
         if [ "${{ matrix.os }}" == "ubuntu-22.04" ]; then
           sudo apt-get -y update &&
-          sudo apt-get install python3 pip g++-12 clang-14 binutils
+          sudo apt-get install python3 pip g++-12 clang-14 binutils ocl-icd-opencl-dev
         fi
 
     - name: Install conan and set venv
@@ -57,6 +57,5 @@ jobs:
       run:
         cmake --build build -j
 
-    - name: Test
-      if: ${{ matrix.build_type == 'debug' }}
-      run: ctest --output-on-failure --test-dir build -j --no-tests=error
+    # no tests here because it runs on GPUless runner and we can only check buildability here
+    # tests can be run locally
