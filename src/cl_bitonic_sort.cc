@@ -34,9 +34,7 @@ void BitonicSorter::sort(std::vector<int>& data) {
   bitonic_split.setArg(1, local);
 
   auto events = std::vector<cl::Event>();
-  if (!runKernel(bitonic_split, global_size, local_size, events)) {
-    throw std::runtime_error("bitonicSplit kernel failed");
-  }
+  runKernel(bitonic_split, global_size, local_size, events);
   events.front().wait();
 
   for (auto stage = local_size << 1; stage <= global_size; stage <<= 1) {
@@ -45,9 +43,7 @@ void BitonicSorter::sort(std::vector<int>& data) {
       bitonic_merge.setArg(1, stage);
       bitonic_merge.setArg(2, step);
 
-      if (!runKernel(bitonic_merge, global_size, local_size, events)) {
-        throw std::runtime_error("bitonicMerge kernel failed");
-      }
+      runKernel(bitonic_merge, global_size, local_size, events);
     }
   }
 
@@ -57,27 +53,30 @@ void BitonicSorter::sort(std::vector<int>& data) {
   data.resize(old_data_sz);
 }
 
-bool BitonicSorter::runKernel(const cl::Kernel& kernel,
+void BitonicSorter::runKernel(const cl::Kernel& kernel,
                               std::size_t global_size,
                               std::size_t local_size,
                               std::vector<cl::Event>& events) {
-  auto err_num =
-      queue_.enqueueNDRangeKernel(
-          kernel, cl::NullRange, global_size, local_size, &events);
-  return err_num == CL_SUCCESS;
+
+  queue_.enqueueNDRangeKernel(
+      kernel, cl::NullRange, global_size, local_size, &events);
 }
 
 cl::Platform BitonicSorter::selectPlatform() {
   std::vector<cl::Platform> platforms;
   cl::Platform::get(&platforms);
-  assert(!platforms.empty());
+  if (platforms.empty()) {
+    throw std::runtime_error("No OpenCL platforms were found");
+  }
   return platforms.front();
 }
 
 cl::Device BitonicSorter::selectDevice(cl::Platform pl) {
   auto devices = std::vector<cl::Device>();
   pl.getDevices(CL_DEVICE_TYPE_GPU, &devices);
-  assert(!devices.empty());
+  if (devices.empty()) {
+    throw std::runtime_error("No OpenCL devices were found");
+  }
   return devices.front();
 }
 
