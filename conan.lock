@@ -1,0 +1,10 @@
+{
+    "version": "0.5",
+    "requires": [
+        "opencl-headers/2023.12.14#c0238f7f78651c2977a85baeaf451757%1704765802.211",
+        "opencl-clhpp-headers/2023.12.14#e04114f0851df1a5db0ccc9f51de70b9%1705132388.974"
+    ],
+    "build_requires": [],
+    "python_requires": [],
+    "config_requires": []
+}
