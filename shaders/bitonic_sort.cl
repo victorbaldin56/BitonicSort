@@ -13,18 +13,16 @@ __kernel void bitonicSplit(__global int* data,
   size_t group_id = get_group_id(0);
   size_t local_size = get_local_size(0);
 
-  bool descending = group_id & 1;
+  bool descending = (group_id & 1);
 
   local_data[lid] = data[gid];
-
-  // waiting complete store operation
   barrier(CLK_LOCAL_MEM_FENCE);
 
   for (size_t stage = 2; stage <= local_size; stage <<= 1) {
     for (size_t step = stage >> 1; step > 0; step >>= 1) {
       size_t pair_idx = lid ^ step;
       if (pair_idx > lid) {
-        descending = !(lid & stage);
+        //descending = !(lid & stage);
         if (descending) {
           if (local_data[lid] < local_data[pair_idx]) {
             int tmp = local_data[lid];
@@ -40,8 +38,8 @@ __kernel void bitonicSplit(__global int* data,
           }
         }
       }
+      barrier(CLK_LOCAL_MEM_FENCE);
     }
-    barrier(CLK_LOCAL_MEM_FENCE);
   }
 
   data[gid] = local_data[lid];
@@ -50,7 +48,7 @@ __kernel void bitonicSplit(__global int* data,
 /**
  * Bitonic merge
  */
-__kernel void bitonicMerge(__global int *data,
+__kernel void bitonicMerge(__global int* data,
                            const ulong stage,
                            const ulong step) {
   size_t gid = get_global_id(0);

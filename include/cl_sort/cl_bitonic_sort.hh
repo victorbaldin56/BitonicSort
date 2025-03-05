@@ -36,7 +36,8 @@ class BitonicSorter final {
         ctx_(getGpuContext(dev_)),
         queue_(ctx_, dev_, 0),
         cfg_(cfg),
-        shader_(readKernelFromFile(cfg.path_)) {}
+        shader_(readKernelFromFile(cfg.path_)),
+        program_(ctx_, shader_, true) {}
 
   void sort(std::vector<int>& data);
 
@@ -62,6 +63,7 @@ class BitonicSorter final {
   cl::CommandQueue queue_;
   Config cfg_;
   std::string shader_;
+  cl::Program program_;
 
   static constexpr auto kMaxLocalSize = std::size_t{0x100};
 };

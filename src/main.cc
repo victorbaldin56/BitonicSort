@@ -7,15 +7,14 @@ int main() try {
   std::cin.exceptions(std::ios::failbit | std::ios::eofbit);
   std::cin >> n;
 
-  auto data = std::vector<int>(n);
+  auto data = std::vector<int>();
   data.reserve(n);
   while (data.size() < n) {
-    auto e = 0;
+    auto e = int{};
     std::cin >> e;
     data.push_back(e);
   }
 
-  // sorting with OpenCL
   ocl::BitonicSorter app;
   app.sort(data);
   std::copy(data.begin(), data.end(),

@@ -18,17 +18,13 @@ void BitonicSorter::sort(std::vector<int>& data) {
   auto local_size = std::min(global_size, kMaxLocalSize);
 
   auto buffer = cl::Buffer(ctx_, CL_MEM_READ_WRITE, sizeof(int) * new_data_sz);
-  queue_.enqueueWriteBuffer(
-      buffer, true, 0, sizeof(int) * new_data_sz, data.data());
+  cl::copy(queue_, data.begin(), data.end(), buffer);
 
   auto local =
       static_cast<cl::LocalSpaceArg>(cl::Local(local_size * sizeof(int)));
 
-  // compiles shader immediately
-  auto program = cl::Program(ctx_, shader_, true);
-
-  auto bitonic_split = cl::Kernel(program, "bitonicSplit");
-  auto bitonic_merge = cl::Kernel(program, "bitonicMerge");
+  auto bitonic_split = cl::Kernel(program_, "bitonicSplit");
+  auto bitonic_merge = cl::Kernel(program_, "bitonicMerge");
 
   bitonic_split.setArg(0, buffer);
   bitonic_split.setArg(1, local);
