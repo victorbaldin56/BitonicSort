@@ -3,7 +3,7 @@
 #include "cl_sort/cl_bitonic_sort.hh"
 
 int main() try {
-  auto n = static_cast<std::size_t>(0);
+  auto n = std::size_t{};
   std::cin.exceptions(std::ios::failbit | std::ios::eofbit);
   std::cin >> n;
 

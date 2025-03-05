@@ -63,7 +63,7 @@ class BitonicSorter final {
   Config cfg_;
   std::string shader_;
 
-  static constexpr auto kMaxLocalSize = static_cast<std::size_t>(0x100);
+  static constexpr auto kMaxLocalSize = std::size_t{0x100};
 };
 
 } // namespace ocl

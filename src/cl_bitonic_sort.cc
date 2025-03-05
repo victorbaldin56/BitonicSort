@@ -37,6 +37,8 @@ void BitonicSorter::sort(std::vector<int>& data) {
   runKernel(bitonic_split, global_size, local_size, events);
   events.front().wait();
 
+  events.clear();
+
   for (auto stage = local_size << 1; stage <= global_size; stage <<= 1) {
     for (auto step = stage >> 1; step > 0; step >>= 1) {
       bitonic_merge.setArg(0, buffer);
