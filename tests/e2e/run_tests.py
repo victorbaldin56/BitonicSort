@@ -8,7 +8,7 @@ def getAns(input_file):
       stdin=infile, text=True, capture_output=True
     )
 
-  if process.stderr != 0:
+  if process.returncode != 0:
     raise RuntimeError(f"Bitonic driver failed: {process.stderr}")
   return process.stdout
 

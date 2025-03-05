@@ -11,6 +11,7 @@ namespace ocl {
 
 void BitonicSorter::sort(std::vector<int>& data) {
   auto old_data_sz = data.size();
+  prepareData(data);
   auto new_data_sz = data.size();
 
   auto global_size = new_data_sz;
@@ -18,9 +19,8 @@ void BitonicSorter::sort(std::vector<int>& data) {
 
   auto buffer = cl::Buffer(ctx_, CL_MEM_READ_WRITE, sizeof(int) * new_data_sz);
   queue_.enqueueWriteBuffer(
-      buffer, true, 0, sizeof(int) * new_data_sz, data.data());;
+      buffer, true, 0, sizeof(int) * new_data_sz, data.data());
 
-  // allocating twice local_size because we are going to work with pairs
   auto local =
       static_cast<cl::LocalSpaceArg>(cl::Local(local_size * sizeof(int)));
 
@@ -57,9 +57,10 @@ void BitonicSorter::runKernel(const cl::Kernel& kernel,
                               std::size_t global_size,
                               std::size_t local_size,
                               std::vector<cl::Event>& events) {
-
+  auto evt = cl::Event();
   queue_.enqueueNDRangeKernel(
-      kernel, cl::NullRange, global_size, local_size, &events);
+      kernel, cl::NullRange, global_size, local_size, nullptr, &evt);
+  events.push_back(evt);
 }
 
 cl::Platform BitonicSorter::selectPlatform() {
