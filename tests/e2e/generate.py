@@ -2,7 +2,7 @@ import os
 import random
 import config
 
-MIN_NUMBER = -(1 << 32)
+MIN_NUMBER = -(1 << 31)
 MAX_NUMBER = -(MIN_NUMBER + 1)
 
 def generateRandomList():

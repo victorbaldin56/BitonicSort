@@ -7,6 +7,8 @@ class MatrixRecipe(ConanFile):
   version = "1.0"
   settings = "os", "compiler", "build_type", "arch"
   generators = "CMakeDeps"
+  options = {"testing": [True, False]}
+  default_options = {"testing": False}
 
   def requirements(self):
     self.requires("opencl-clhpp-headers/2023.12.14")
@@ -14,6 +16,7 @@ class MatrixRecipe(ConanFile):
   def generate(self):
     # Customize CMakeToolchain in the generate() method
     tc = CMakeToolchain(self)
+    tc.variables["BUILD_TESTING"] = self.options.testing
     tc.generate()
 
   def build(self):
