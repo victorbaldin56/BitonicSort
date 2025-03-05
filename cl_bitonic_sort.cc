@@ -5,62 +5,115 @@
 #include "cl_sort/cl_bitonic_sort.hh"
 
 #include <cassert>
+#include <numeric>
 
 namespace ocl {
 
-cl::Event App::bitonicSort(int* data, std::size_t sz) {
-  std::size_t buf_sz = sz * sizeof(int);
+void BitonicSorter::sort(std::vector<int>& data) {
+  auto old_data_sz = data.size();
+  auto new_data_sz = data.size();
 
-  cl::Buffer buf(ctx_, CL_MEM_READ_WRITE, buf_sz);
-  cl::copy(queue_, data, data + sz, buf);
+  auto global_size = new_data_sz;
+  auto local_size = std::min(global_size, kMaxLocalSize);
 
-  // loading kernel
-  cl::Program program(ctx_, kernel_, true);
-  program.build("-cl-std=CL1.2");
-  bitonicSortT sort(program, "bitonicSort");
+  auto buffer = cl::Buffer(ctx_, CL_MEM_READ_WRITE, sizeof(int) * new_data_sz);
+  queue_.enqueueWriteBuffer(
+      buffer, true, 0, sizeof(int) * new_data_sz, data.data());;
 
-  cl::NDRange global_range(sz);
-  cl::NDRange local_range(kLocalSize);
-  cl::EnqueueArgs args(queue_, global_range, local_range);
+  // allocating twice local_size because we are going to work with pairs
+  auto local =
+      static_cast<cl::LocalSpaceArg>(cl::Local(local_size * sizeof(int)));
 
-  cl::Event evt = sort(args, buf, cl::Local(sizeof(int) * kLocalSize), sz);
-  evt.wait();
+  // compiles shader immediately
+  auto program = cl::Program(ctx_, shader_, true);
 
-  cl::copy(queue_, buf, data, data + sz);
-  return evt; // for profiling
+  auto bitonic_split = cl::Kernel(program, "bitonicSplit");
+  auto bitonic_merge = cl::Kernel(program, "bitonicMerge");
+
+  bitonic_split.setArg(0, buffer);
+  bitonic_split.setArg(1, local);
+
+  auto events = std::vector<cl::Event>();
+  if (!runKernel(bitonic_split, global_size, local_size, events)) {
+    throw std::runtime_error("bitonicSplit kernel failed");
+  }
+  events.front().wait();
+
+  for (auto stage = local_size << 1; stage <= global_size; stage <<= 1) {
+    for (auto step = stage >> 1; step > 0; step >>= 1) {
+      bitonic_merge.setArg(0, buffer);
+      bitonic_merge.setArg(1, stage);
+      bitonic_merge.setArg(2, step);
+
+      if (!runKernel(bitonic_merge, global_size, local_size, events)) {
+        throw std::runtime_error("bitonicMerge kernel failed");
+      }
+    }
+  }
+
+  std::for_each(events.begin(), events.end(), [](auto& evt) { evt.wait(); });
+
+  cl::copy(queue_, buffer, data.begin(), data.end());
+  data.resize(old_data_sz);
 }
 
-cl::Platform App::selectPlatform() {
+bool BitonicSorter::runKernel(const cl::Kernel& kernel,
+                              std::size_t global_size,
+                              std::size_t local_size,
+                              std::vector<cl::Event>& events) {
+  auto err_num =
+      queue_.enqueueNDRangeKernel(
+          kernel, cl::NullRange, global_size, local_size, &events);
+  return err_num == CL_SUCCESS;
+}
+
+cl::Platform BitonicSorter::selectPlatform() {
   std::vector<cl::Platform> platforms;
   cl::Platform::get(&platforms);
   assert(!platforms.empty());
   return platforms.front();
 }
 
-cl::Device App::selectDevice(cl::Platform pl) {
-  std::vector<cl::Device> devices;
+cl::Device BitonicSorter::selectDevice(cl::Platform pl) {
+  auto devices = std::vector<cl::Device>();
   pl.getDevices(CL_DEVICE_TYPE_GPU, &devices);
   assert(!devices.empty());
   return devices.front();
 }
 
-cl::Context App::getGpuContext(cl::Device dev) {
+cl::Context BitonicSorter::getGpuContext(cl::Device dev) {
   return cl::Context(dev);
 }
 
-std::string App::readKernelFromFile(const char *path) {
-  std::string code;
-  std::ifstream shader_file;
+std::string BitonicSorter::readKernelFromFile(const char *path) {
+  auto code = std::string();
+  auto shader_file = std::ifstream();
   shader_file.open(path);
   if (!shader_file.is_open()) {
     std::string what = std::string("Failed to open file ") + path;
     throw std::runtime_error(what);
   }
-  std::stringstream shader_stream;
+  auto shader_stream = std::stringstream();
   shader_stream << shader_file.rdbuf();
   shader_file.close();
   code = shader_stream.str();
   return code;
+}
+
+/**
+ * Resize vector to closest power of two
+ */
+void BitonicSorter::prepareData(std::vector<int>& data) {
+  auto elem = std::numeric_limits<int>::max();  // to not affect final result
+
+  auto old_sz = data.size();
+  auto new_size_log = static_cast<std::size_t>(std::ceil(std::log2(old_sz)));
+  auto new_sz = 1 << new_size_log;
+  data.reserve(new_sz);
+
+  while (data.size() < new_sz) {
+    data.push_back(elem);
+  }
 }
 
 } // namespace ocl
