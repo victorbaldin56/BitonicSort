@@ -22,8 +22,8 @@ namespace ocl {
 
 struct Config {
   std::filesystem::path path_ =
-      std::filesystem::absolute(__FILE__).parent_path()
-          .append("bitonic_sort.cl");
+      std::filesystem::absolute(PROJECT_ROOT)
+          .append("shaders/bitonic_sort.cl");
   cl::QueueProperties queue_props_ =
       cl::QueueProperties::Profiling | cl::QueueProperties::OutOfOrder;
 };
