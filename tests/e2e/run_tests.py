@@ -10,13 +10,13 @@ def getAns(input_file):
 
   if process.returncode != 0:
     raise RuntimeError(f"Bitonic driver failed: {process.stderr}")
-  return process.stdout
+  return process.stdout.strip()
 
 def test(test_num):
   input_path = config.input_dir + f"test_{test_num:02d}.in"
   ans_path = config.ans_dir + f"ans_{test_num:02d}.out"
 
-  ans_str = getAns(input_path).rstrip()
+  ans_str = getAns(input_path)
   with open(ans_path, "r") as ans:
     reference_str = ans.readline().rstrip()
     if (reference_str != ans_str):

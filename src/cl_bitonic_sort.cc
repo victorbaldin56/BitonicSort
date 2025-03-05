@@ -13,6 +13,7 @@ void BitonicSorter::sort(std::vector<int>& data) {
   auto old_data_sz = data.size();
   prepareData(data);
   auto new_data_sz = data.size();
+  assert((new_data_sz & (new_data_sz - 1)) == 0);
 
   auto global_size = new_data_sz;
   auto local_size = std::min(global_size, kMaxLocalSize);
@@ -35,7 +36,7 @@ void BitonicSorter::sort(std::vector<int>& data) {
 
   events.clear();
 
-  for (auto stage = local_size << 1; stage <= global_size; stage <<= 1) {
+  for (auto stage = std::size_t{2}; stage <= global_size; stage <<= 1) {
     for (auto step = stage >> 1; step > 0; step >>= 1) {
       bitonic_merge.setArg(0, buffer);
       bitonic_merge.setArg(1, stage);
@@ -47,7 +48,7 @@ void BitonicSorter::sort(std::vector<int>& data) {
 
   std::for_each(events.begin(), events.end(), [](auto& evt) { evt.wait(); });
 
-  cl::copy(queue_, buffer, data.begin(), data.end());
+  cl::copy(queue_, buffer, data.begin(), data.begin() + old_data_sz);
   data.resize(old_data_sz);
 }
 
@@ -103,9 +104,12 @@ std::string BitonicSorter::readKernelFromFile(
  * Resize vector to closest power of two
  */
 void BitonicSorter::prepareData(std::vector<int>& data) {
-  auto elem = std::numeric_limits<int>::max();  // to not affect final result
-
   auto old_sz = data.size();
+  if (old_sz == 0 || old_sz == 1) {
+    return;
+  }
+
+  auto elem = std::numeric_limits<int>::max();  // to not affect final result
   auto new_size_log = static_cast<std::size_t>(std::ceil(std::log2(old_sz)));
   auto new_sz = 1 << new_size_log;
   data.reserve(new_sz);
