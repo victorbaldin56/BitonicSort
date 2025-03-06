@@ -24,17 +24,9 @@ __kernel void bitonicSplit(__global int* data,
   for (size_t stage = 2; stage <= local_size; stage <<= 1) {
     for (size_t step = stage >> 1; step > 0; step >>= 1) {
       size_t pair_idx = lid ^ step;
-      if (pair_idx > lid) {
-        if (descending) {
-          if (local_data[lid] < local_data[pair_idx]) {
-            swap_local(&local_data[lid], &local_data[pair_idx]);
-          }
-        }
-        else {
-          if (local_data[lid] > local_data[pair_idx]) {
-            swap_local(&local_data[lid], &local_data[pair_idx]);
-          }
-        }
+      if (pair_idx > lid &&
+          (local_data[lid] < local_data[pair_idx]) == descending) {
+        swap_local(&local_data[lid], &local_data[pair_idx]);
       }
       barrier(CLK_LOCAL_MEM_FENCE);
     }
@@ -51,17 +43,8 @@ __kernel void bitonicMerge(__global int* data,
                            const ulong step) {
   size_t gid = get_global_id(0);
   size_t pair_idx = gid ^ step;
-  if (pair_idx > gid) {
-    if ((gid & stage) == 0) {
-      if (data[gid] > data[pair_idx]) {
-        swap_global(&data[gid], &data[pair_idx]);
-      }
-    }
-    else {
-      if (data[gid] < data[pair_idx]) {
-        swap_global(&data[gid], &data[pair_idx]);
-      }
-    }
+  if (pair_idx > gid && (data[gid] > data[pair_idx]) == ((gid & stage) == 0)) {
+    swap_global(&data[gid], &data[pair_idx]);
   }
 }
 
