@@ -1,12 +1,13 @@
 #include <algorithm>
+#include <chrono>
 
 #include "benchmark/benchmark.h"
 
 #include "cl_sort/cl_bitonic_sort.hh"
 
-constexpr auto kNumIterations = 10;
+constexpr auto kNumIterations = 100;
 
-class FileSortFixture : public benchmark::Fixture {
+class SortCompareFixture : public benchmark::Fixture {
 public:
   void SetUp(const benchmark::State& state) override {
     input_dir_ =
@@ -51,24 +52,40 @@ public:
   static constexpr auto kRelativeInputPath = "tests/e2e/generated/input";
 };
 
-BENCHMARK_DEFINE_F(FileSortFixture, BitonicSort)(benchmark::State& state) {
-  auto data = original_data_;
-  for (auto _ : state) {
-    sorter_.sort(data);
-  }
-}
-BENCHMARK_REGISTER_F(FileSortFixture, BitonicSort)
-  ->DenseRange(1, FileSortFixture::kBenchNum)
-  ->Iterations(kNumIterations);
+BENCHMARK_DEFINE_F(SortCompareFixture, CompareSorts)(benchmark::State& state) {
+  auto bitonic_sorter = bts::BitonicSorter();
 
-BENCHMARK_DEFINE_F(FileSortFixture, StdSort)(benchmark::State& state) {
-  auto data = original_data_;
   for (auto _ : state) {
-    std::sort(data.begin(), data.end());
+    state.PauseTiming();
+    auto bitonic_data = original_data_;
+    auto std_data = original_data_;
+
+    auto bitonic_start = std::chrono::high_resolution_clock::now();
+    bitonic_sorter.sort(bitonic_data);
+    auto bitonic_end = std::chrono::high_resolution_clock::now();
+
+    auto std_start = std::chrono::high_resolution_clock::now();
+    std::sort(std_data.begin(), std_data.end());
+    auto std_end = std::chrono::high_resolution_clock::now();
+
+    state.counters["bitonic_time (ms)"] =
+        benchmark::Counter(
+            std::chrono::duration_cast<std::chrono::duration<double>>(
+                bitonic_end - bitonic_start).count() * 1000,
+            benchmark::Counter::kAvgThreads,
+            benchmark::Counter::OneK::kIs1024);
+
+    state.counters["std_time (ms)"] =
+        benchmark::Counter(
+            std::chrono::duration_cast<std::chrono::duration<double>>(
+                std_end - std_start).count() * 1000,
+            benchmark::Counter::kAvgThreads,
+            benchmark::Counter::OneK::kIs1024);
   }
 }
-BENCHMARK_REGISTER_F(FileSortFixture, StdSort)
-  ->DenseRange(1, FileSortFixture::kBenchNum)
+
+BENCHMARK_REGISTER_F(SortCompareFixture, CompareSorts)
+  ->DenseRange(1, SortCompareFixture::kBenchNum)
   ->Iterations(kNumIterations);
 
 BENCHMARK_MAIN();

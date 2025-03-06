@@ -1,0 +1,19 @@
+2025-03-06T06:20:35+03:00
+Running ./bench/bench
+Run on (11 X 24 MHz CPU s)
+CPU Caches:
+  L1 Data 64 KiB
+  L1 Instruction 128 KiB
+  L2 Unified 4096 KiB (x11)
+Load Average: 1.11, 1.54, 1.73
+name,iterations,real_time,cpu_time,time_unit,bytes_per_second,items_per_second,label,error_occurred,error_message,"bitonic_time (ms)","std_time (ms)"
+"SortCompareFixture/CompareSorts/1/iterations:100",100,1.28494e+09,8.50261e+08,ns,,,,,,15.4872,15.8214
+"SortCompareFixture/CompareSorts/2/iterations:100",100,1.5814e+09,1.07282e+09,ns,,,,,,8.18208,20.2394
+"SortCompareFixture/CompareSorts/3/iterations:100",100,2.54102e+09,1.62618e+09,ns,,,,,,14.6952,30.5368
+"SortCompareFixture/CompareSorts/4/iterations:100",100,4.82426e+09,3.35541e+09,ns,,,,,,31.0749,63.2848
+"SortCompareFixture/CompareSorts/5/iterations:100",100,5.88779e+09,4.40768e+09,ns,,,,,,30.9986,86.4101
+"SortCompareFixture/CompareSorts/6/iterations:100",100,9.94646e+09,6.49304e+09,ns,,,,,,76.4585,121.611
+"SortCompareFixture/CompareSorts/7/iterations:100",100,1.01374e+10,6.74903e+09,ns,,,,,,71.6106,126.323
+"SortCompareFixture/CompareSorts/8/iterations:100",100,1.09139e+10,7.44127e+09,ns,,,,,,74.0537,140.453
+"SortCompareFixture/CompareSorts/9/iterations:100",100,1.22571e+10,8.75459e+09,ns,,,,,,79.658,167.071
+"SortCompareFixture/CompareSorts/10/iterations:100",100,1.76787e+10,1.06874e+10,ns,,,,,,147.2,200.294
