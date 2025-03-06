@@ -5,7 +5,7 @@
 
 #include "cl_sort/cl_bitonic_sort.hh"
 
-constexpr auto kNumIterations = 100;
+constexpr auto kNumIterations = 10;
 
 class SortCompareFixture : public benchmark::Fixture {
 public:
@@ -68,18 +68,19 @@ BENCHMARK_DEFINE_F(SortCompareFixture, CompareSorts)(benchmark::State& state) {
     std::sort(std_data.begin(), std_data.end());
     auto std_end = std::chrono::high_resolution_clock::now();
 
-    state.counters["size"] =
-        benchmark::Counter(original_data_.size());
+    auto std_time =
+        std::chrono::duration_cast<std::chrono::duration<double>>(
+            std_end - std_start).count() * 1000;
 
-    state.counters["bitonic_time (ms)"] =
-        benchmark::Counter(
-            std::chrono::duration_cast<std::chrono::duration<double>>(
-                bitonic_end - bitonic_start).count() * 1000);
+    auto bitonic_time =
+        std::chrono::duration_cast<std::chrono::duration<double>>(
+            bitonic_end - bitonic_start).count() * 1000;
 
-    state.counters["std_time (ms)"] =
-        benchmark::Counter(
-            std::chrono::duration_cast<std::chrono::duration<double>>(
-                std_end - std_start).count() * 1000);
+    state.counters["size"] = benchmark::Counter(original_data_.size());
+    state.counters["bitonic_time (ms)"] = benchmark::Counter(bitonic_time);
+    state.counters["std_time (ms)"] = benchmark::Counter(std_time);
+    state.counters["std_time / bitonic_time"] =
+        benchmark::Counter(std_time / bitonic_time);
   }
 }
 
