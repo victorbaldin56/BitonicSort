@@ -7,7 +7,7 @@ MAX_NUMBER = -(MIN_NUMBER + 1)
 
 def generateRandomList():
   return [random.randint(MIN_NUMBER, MAX_NUMBER)
-          for _ in range(random.randint(10000, 100000))]
+          for _ in range(random.randint(100000, 1000000))]
 
 def generateInputFile(test_num):
   inp = generateRandomList()
