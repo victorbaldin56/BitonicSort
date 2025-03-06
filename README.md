@@ -17,8 +17,8 @@ This is OpenCL bitonic sort implementation.
 1. Clone:
 
    ```sh
-   git clone https://github.com/victorbaldin56/MatrixCPP.git
-   cd MatrixCPP
+   git clone https://github.com/victorbaldin56/BitonicSort.git
+   cd BitonicSort
    ```
 
 1. Create virtual environment for Python:
