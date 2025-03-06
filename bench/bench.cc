@@ -68,19 +68,18 @@ BENCHMARK_DEFINE_F(SortCompareFixture, CompareSorts)(benchmark::State& state) {
     std::sort(std_data.begin(), std_data.end());
     auto std_end = std::chrono::high_resolution_clock::now();
 
+    state.counters["size"] =
+        benchmark::Counter(original_data_.size());
+
     state.counters["bitonic_time (ms)"] =
         benchmark::Counter(
             std::chrono::duration_cast<std::chrono::duration<double>>(
-                bitonic_end - bitonic_start).count() * 1000,
-            benchmark::Counter::kAvgThreads,
-            benchmark::Counter::OneK::kIs1024);
+                bitonic_end - bitonic_start).count() * 1000);
 
     state.counters["std_time (ms)"] =
         benchmark::Counter(
             std::chrono::duration_cast<std::chrono::duration<double>>(
-                std_end - std_start).count() * 1000,
-            benchmark::Counter::kAvgThreads,
-            benchmark::Counter::OneK::kIs1024);
+                std_end - std_start).count() * 1000);
   }
 }
 
