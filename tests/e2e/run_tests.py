@@ -4,7 +4,7 @@ import subprocess
 def getAns(input_file):
   with open(input_file, "r") as infile:
     process = subprocess.run(
-      [config.file_path + "/../../build/bitonic"],
+      [config.file_path + "/../../build/driver/driver"],
       stdin=infile, text=True, capture_output=True
     )
 

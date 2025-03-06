@@ -3,13 +3,17 @@ project(BitonicSort)
 
 find_package(OpenCL REQUIRED)
 find_package(OpenCLHeadersCpp REQUIRED)
+find_package(benchmark REQUIRED)
 
-add_executable(bitonic src/cl_bitonic_sort.cc src/main.cc)
+add_library(bitonic src/cl_bitonic_sort.cc)
 
-target_include_directories(bitonic PRIVATE include)
-target_compile_features(bitonic PRIVATE cxx_std_17)
+target_include_directories(bitonic PUBLIC include)
+target_compile_features(bitonic PUBLIC cxx_std_17)
 target_link_libraries(bitonic OpenCL::HeadersCpp OpenCL::OpenCL)
-target_compile_definitions(bitonic PRIVATE PROJECT_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+target_compile_definitions(bitonic PUBLIC PROJECT_ROOT="${CMAKE_CURRENT_SOURCE_DIR}")
+
+add_subdirectory(bench)
+add_subdirectory(driver)
 
 if (${BUILD_TESTING})
   enable_testing()
