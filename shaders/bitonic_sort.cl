@@ -3,6 +3,9 @@
  * Bitonic sort kernels.
  */
 
+void swap_global(__global int* a, __global int* b);
+void swap_local(__local int* a, __local int* b);
+
 /**
  * Bitonic split
  */
@@ -22,19 +25,14 @@ __kernel void bitonicSplit(__global int* data,
     for (size_t step = stage >> 1; step > 0; step >>= 1) {
       size_t pair_idx = lid ^ step;
       if (pair_idx > lid) {
-        //descending = !(lid & stage);
         if (descending) {
           if (local_data[lid] < local_data[pair_idx]) {
-            int tmp = local_data[lid];
-            local_data[lid] = local_data[pair_idx];
-            local_data[pair_idx] = tmp;
+            swap_local(&local_data[lid], &local_data[pair_idx]);
           }
         }
         else {
           if (local_data[lid] > local_data[pair_idx]) {
-            int tmp = local_data[lid];
-            local_data[lid] = local_data[pair_idx];
-            local_data[pair_idx] = tmp;
+            swap_local(&local_data[lid], &local_data[pair_idx]);
           }
         }
       }
@@ -56,17 +54,31 @@ __kernel void bitonicMerge(__global int* data,
   if (pair_idx > gid) {
     if ((gid & stage) == 0) {
       if (data[gid] > data[pair_idx]) {
-        int tmp = data[gid];
-        data[gid] = data[pair_idx];
-        data[pair_idx] = tmp;
+        swap_global(&data[gid], &data[pair_idx]);
       }
     }
     else {
       if (data[gid] < data[pair_idx]) {
-        int tmp = data[gid];
-        data[gid] = data[pair_idx];
-        data[pair_idx] = tmp;
+        swap_global(&data[gid], &data[pair_idx]);
       }
     }
   }
+}
+
+/**
+ * Swap two elements in global memory
+ */
+void swap_global(__global int* a, __global int* b) {
+  int tmp = *a;
+  *a = *b;
+  *b = tmp;
+}
+
+/**
+ * Swap two elements in local memory
+ */
+void swap_local(__local int* a, __local int* b) {
+  int tmp = *a;
+  *a = *b;
+  *b = tmp;
 }
