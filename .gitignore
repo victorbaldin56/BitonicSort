@@ -22,3 +22,5 @@ CMakeUserPresets.json
 
 # Doxygen
 html/
+
+.DS_Store
