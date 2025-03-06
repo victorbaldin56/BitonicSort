@@ -12,6 +12,7 @@ class MatrixRecipe(ConanFile):
 
   def requirements(self):
     self.requires("opencl-clhpp-headers/2023.12.14")
+    self.requires("benchmark/1.9.1")  # Google benchmark
 
   def generate(self):
     # Customize CMakeToolchain in the generate() method

@@ -7,7 +7,25 @@
 #include <cassert>
 #include <numeric>
 
-namespace ocl {
+namespace {
+
+template <typename Integer,
+          typename = std::enable_if<std::is_integral_v<Integer>>>
+Integer nextPowerOfTwo(Integer n) {
+  --n;
+  n |= n >> 1;
+  n |= n >> 2;
+  n |= n >> 4;
+  if constexpr (sizeof(n) > 1) { n |= n >> 8;  }
+  if constexpr (sizeof(n) > 2) { n |= n >> 16; }
+  if constexpr (sizeof(n) > 4) { n |= n >> 32; }
+  ++n;
+  return n;
+}
+
+}  // namespace
+
+namespace bts {
 
 void BitonicSorter::sort(std::vector<int>& data) {
   auto old_data_sz = data.size();
@@ -105,15 +123,10 @@ std::string BitonicSorter::readKernelFromFile(
  */
 void BitonicSorter::prepareData(std::vector<int>& data) {
   auto old_sz = data.size();
-  if (old_sz == 0 || old_sz == 1) {
-    return;
-  }
-
-  auto elem = std::numeric_limits<int>::max();  // to not affect final result
-  auto new_size_log = static_cast<std::size_t>(std::ceil(std::log2(old_sz)));
-  auto new_sz = 1 << new_size_log;
+  auto new_sz = nextPowerOfTwo(old_sz);
   data.reserve(new_sz);
 
+  auto elem = std::numeric_limits<int>::max();  // to not affect final result
   while (data.size() < new_sz) {
     data.push_back(elem);
   }

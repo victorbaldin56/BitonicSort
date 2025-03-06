@@ -15,7 +15,7 @@ int main() try {
     data.push_back(e);
   }
 
-  ocl::BitonicSorter app;
+  bts::BitonicSorter app;
   app.sort(data);
   std::copy(data.begin(), data.end(),
             std::ostream_iterator<int>(std::cout, " "));

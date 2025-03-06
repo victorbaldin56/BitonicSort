@@ -18,7 +18,7 @@
 
 #include "CL/opencl.hpp"
 
-namespace ocl {
+namespace bts {
 
 struct Config {
   std::filesystem::path path_ =
