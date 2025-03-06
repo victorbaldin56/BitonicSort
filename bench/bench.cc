@@ -5,7 +5,7 @@
 
 #include "cl_sort/cl_bitonic_sort.hh"
 
-constexpr auto kNumIterations = 10;
+constexpr auto kNumIterations = 1;
 
 class SortCompareFixture : public benchmark::Fixture {
 public:

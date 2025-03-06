@@ -74,4 +74,5 @@ All measurements have done on my machine with the following specs:
 Results of benchmark can be found in this tabular: [results.csv](results/results.csv).
 A single benchmark takes data from a single file from `tests/e2e/generated/input`.
 Each benchmark has been run 8 times to filter out possible undesired external impact.
-As it can be seen from the table,
+As it can be seen from the table, bitonic sort is 1.6-2.3 times faster than `std::sort` in average in
+10 tested benchmarks.

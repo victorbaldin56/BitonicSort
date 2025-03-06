@@ -22,6 +22,8 @@ __kernel void bitonicSplit(__global int* data,
   barrier(CLK_LOCAL_MEM_FENCE);
 
   for (size_t stage = 2; stage <= local_size; stage <<= 1) {
+
+#pragma unroll
     for (size_t step = stage >> 1; step > 0; step >>= 1) {
       size_t pair_idx = lid ^ step;
       if (pair_idx > lid &&
