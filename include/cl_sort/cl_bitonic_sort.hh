@@ -4,6 +4,7 @@
 #include <chrono>
 #include <random>
 #include <iostream>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 
@@ -17,42 +18,54 @@
 
 #include "CL/opencl.hpp"
 
-namespace ocl {
-
-constexpr std::size_t kLocalSize = 16;
+namespace bts {
 
 struct Config {
-  const char* path_ = "bitonic_sort.cl";
+  std::filesystem::path path_ =
+      std::filesystem::absolute(PROJECT_ROOT)
+          .append("shaders/bitonic_sort.cl");
   cl::QueueProperties queue_props_ =
       cl::QueueProperties::Profiling | cl::QueueProperties::OutOfOrder;
 };
 
-class App final {
-  cl::Platform pl_;
-  cl::Device dev_;
-  cl::Context ctx_;
-  cl::CommandQueue queue_;
-  Config cfg_;
-  std::string kernel_;
-
-  static cl::Platform selectPlatform();
-  static cl::Device selectDevice(cl::Platform pl);
-  static cl::Context getGpuContext(cl::Device dev);
-  static std::string readKernelFromFile(const char* path);
-
-  using bitonicSortT
-      = cl::KernelFunctor<cl::Buffer, cl::LocalSpaceArg, cl_ulong>;
-
+class BitonicSorter final {
  public:
-  App(Config cfg = {})
+  BitonicSorter(Config cfg = {})
       : pl_(selectPlatform()),
         dev_(selectDevice(pl_)),
         ctx_(getGpuContext(dev_)),
         queue_(ctx_, dev_, 0),
         cfg_(cfg),
-        kernel_(readKernelFromFile(cfg.path_)) {}
+        shader_(readKernelFromFile(cfg.path_)),
+        program_(ctx_, shader_, true) {}
 
-  cl::Event bitonicSort(int* data, std::size_t sz);
+  void sort(std::vector<int>& data);
+
+ private:
+  void runKernel(const cl::Kernel& kernel,
+                 std::size_t global_size,
+                 std::size_t local_size,
+                 std::vector<cl::Event>& events);
+
+ private:  // constructor helpers
+  static cl::Platform selectPlatform();
+  static cl::Device selectDevice(cl::Platform pl);
+  static cl::Context getGpuContext(cl::Device dev);
+  static std::string readKernelFromFile(const std::filesystem::path& path);
+
+ private:  // helpers
+  static void prepareData(std::vector<int>& data);
+
+ private:
+  cl::Platform pl_;
+  cl::Device dev_;
+  cl::Context ctx_;
+  cl::CommandQueue queue_;
+  Config cfg_;
+  std::string shader_;
+  cl::Program program_;
+
+  static constexpr auto kMaxLocalSize = std::size_t{0x100};
 };
 
 } // namespace ocl

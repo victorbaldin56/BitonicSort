@@ -1,0 +1,13 @@
+{
+    "version": "0.5",
+    "requires": [
+        "opencl-headers/2023.12.14#c0238f7f78651c2977a85baeaf451757%1704765802.211",
+        "opencl-clhpp-headers/2023.12.14#e04114f0851df1a5db0ccc9f51de70b9%1705132388.974",
+        "benchmark/1.9.1#73d267daf0371b7f6605edef1594a681%1736524768.274"
+    ],
+    "build_requires": [
+        "cmake/3.31.3#8733a6094cad0031a30ddbd1e6055117%1735557487.463"
+    ],
+    "python_requires": [],
+    "config_requires": []
+}
