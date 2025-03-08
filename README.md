@@ -41,17 +41,22 @@ This is OpenCL bitonic sort implementation.
    conan install . --output-folder=build --build=missing
    ```
 
-1. Configure CMake:
-
-   ```sh
-   cd build
-   cmake .. --preset conan-release
-   ```
+1. Configure CMake: in this step follow recommendations in `conan install`
+   output from the previous step for your version of CMake.
 
 1. Build:
 
    ```sh
+   cd build
    cmake --build . -j
+   ```
+
+   *Note*: if you are using multi-config generator
+   (Visual Studio, Ninja Multiconfig, etc),
+   replace the last command with:
+
+   ```sh
+   cmake --build . --config Release -j
    ```
 
 ## Benchmark
