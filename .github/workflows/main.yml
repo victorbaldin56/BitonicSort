@@ -14,9 +14,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04]
-        compiler: [gcc, clang]
+        os: [ubuntu-22.04, windows-2022]
+        compiler: [gcc, clang, cl]
         build_type: [debug, release]
+        exclude:
+          - os: windows-2022
+            compiler: gcc
+          - os: windows-2022
+            compiler: clang
+          - os: ubuntu-22.04
+            compiler: cl
 
     steps:
     - uses: actions/checkout@v4
@@ -28,14 +35,27 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
-    - name: Install system packages
+    - name: Install Ubuntu packages
+      if: matrix.os == 'ubuntu-22.04'
       run: |
-        if [ "${{ matrix.os }}" == "ubuntu-22.04" ]; then
-          sudo apt-get -y update &&
-          sudo apt-get install python3 pip g++-12 clang-14 binutils ocl-icd-opencl-dev
-        fi
+        sudo apt-get update -y
+        sudo apt-get install -y python3 pip g++-12 clang-14 binutils ocl-icd-opencl-dev
+
+    - name: Setup MSVC
+      if: matrix.os == 'windows-latest'
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+
+    - name: Install Windows dependencies
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: |
+        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+        python -m pip install --upgrade pip
 
     - name: Install conan and set venv
+      shell: bash
       run: python3 -m venv .venv;
            source .venv/bin/activate;
            echo PATH=$PATH >> $GITHUB_ENV;
