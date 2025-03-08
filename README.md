@@ -48,13 +48,10 @@ This is OpenCL bitonic sort implementation.
 
    ```sh
    cd build
-   ```
-
-   ```sh
    cmake --build . -j
    ```
 
-   *Note*: if you are using multi-config generator (Visual Studio, Ninja Multiconfig, etc), do instead:
+   *Note*: if you are using multi-config generator (Visual Studio, Ninja Multiconfig, etc), replace the last command with:
 
    ```sh
    cmake --build . --config Release -j
