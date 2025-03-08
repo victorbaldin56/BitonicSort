@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-22.04, windows-2022]
-        compiler: [gcc, clang, cl]
+        compiler: [gcc, clang, msvc]
         build_type: [debug, release]
         exclude:
           - os: windows-2022
@@ -23,7 +23,7 @@ jobs:
           - os: windows-2022
             compiler: clang
           - os: ubuntu-22.04
-            compiler: cl
+            compiler: msvc
 
     steps:
     - uses: actions/checkout@v4
@@ -42,13 +42,13 @@ jobs:
         sudo apt-get install -y python3 pip g++-12 clang-14 binutils ocl-icd-opencl-dev
 
     - name: Setup MSVC
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-2022'
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
 
     - name: Install Windows dependencies
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-2022'
       shell: pwsh
       run: |
         choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
