@@ -56,10 +56,16 @@ jobs:
 
     - name: Install conan and set venv
       shell: bash
-      run: python3 -m venv .venv;
-           source .venv/bin/activate;
-           echo PATH=$PATH >> $GITHUB_ENV;
-           pip install conan==2.12.1;
+      run: |
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          python -m venv .venv
+          source .venv/Scripts/activate
+        else
+          python3 -m venv .venv
+          source .venv/bin/activate
+        fi
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        pip install conan==2.12.1
 
     - name: Install conan requirements
       run: >
