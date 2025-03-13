@@ -13,7 +13,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gcc, clang]
         build_type: [debug, release]
     container: victorbaldin56/bitonic_sort:62b2637c72aed0feaa2d6ce110d4b240de9208a1
 
@@ -25,7 +24,7 @@ jobs:
       run: |
         conan profile detect --force &&
         conan install . \
-          -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile \
+          -pr=ci/profiles/${{ matrix.build_type }}.profile \
           --output-folder=build \
           --build=missing
 
