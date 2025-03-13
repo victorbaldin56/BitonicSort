@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  docker-build-and-push:
+  docker-build:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
 
@@ -36,15 +36,23 @@ jobs:
     - name: Output Docker tag
       run: echo "DOCKER_TAG=${{ steps.meta.outputs.tags }}" >> $GITHUB_ENV
 
-    - name: Build and push Docker image
+    - name: Build Docker image
       id: push
       uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
       with:
         context: .
         file: ./Dockerfile
-        push: true
+        push: false
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+      run: |
+        docker save -o bitonic_sort.tar bitonic_sort:latest
+
+    - name: Upload Docker image as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: bitonic_sort_image
+        path: bitonic_sort.tar
 
     # - name: Generate artifact attestation
     #   uses: actions/attest-build-provenance@v2
@@ -55,9 +63,7 @@ jobs:
 
   build:
     runs-on: ubuntu-22.04
-    needs: docker-build-and-push
-    container:
-      image: victorbaldin56/bitonic_sort:${{ needs.docker-build-and-push.outputs.docker_tag }}
+    needs: docker-build
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -66,24 +72,26 @@ jobs:
         build_type: [debug, release]
 
     steps:
-    - name: Find
-      run: >
-        find / | grep 'conanfile.py'
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bitonic_sort_image
 
-    - name: Install conan requirements
-      run: >
-        conan install .
-        -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
-        --output-folder=build
-        --build=missing
+      - name: Load Docker image
+        run: docker load -i bitonic_sort.tar
 
-    - name: Configure CMake
-      run: >
-        cmake . -B build --preset conan-${{ matrix.build_type }}
-
-    - name: Build
-      run:
-        cmake --build build -j
+      - name: Run build inside container
+        uses: addnab/docker-run-action@v3
+        with:
+          image: bitonic_sort:latest
+          options: --rm
+          run: |
+            conan install .
+            -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
+            --output-folder=build
+            --build=missing &&
+            cmake . -B build --preset conan-${{ matrix.build_type }} &&
+            cmake --build build -j
 
     # no tests here because it runs on GPUless runner and we can only check buildability here
     # tests can be run locally
