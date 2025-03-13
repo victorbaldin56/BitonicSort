@@ -7,84 +7,32 @@ on:
     branches: [ "master" ]
 
 jobs:
-  docker-build:
+  build-and-test:
     runs-on: ubuntu-22.04
-    timeout-minutes: 30
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
-      run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
-
-    - name: Log in to Docker Hub
-      uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
-      with:
-        username: ${{ secrets.DOCKER_HUB_USERNAME }}
-        password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-    - name: Extract metadata (tags, labels) for Docker
-      id: meta
-      uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-      with:
-        images: ${{ secrets.DOCKER_HUB_USERNAME }}/bitonic_sort
-
-    - name: Output Docker tag
-      run: echo "DOCKER_TAG=${{ steps.meta.outputs.tags }}" >> $GITHUB_ENV
-
-    - name: Build Docker image
-      id: push
-      run: |
-        docker build -t bitonic_sort .
-
-    - name: Save artifacts
-      run: |
-        docker save -o bitonic_sort.tar bitonic_sort
-
-    - name: Upload Docker image as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: bitonic_sort_image
-        path: bitonic_sort.tar
-
-    # - name: Generate artifact attestation
-    #   uses: actions/attest-build-provenance@v2
-    #   with:
-    #     subject-name: index.docker.io/${{ secrets.DOCKER_HUB_USERNAME }}/bitonic_sort
-    #     subject-digest: ${{ steps.push.outputs.digest }}
-    #     push-to-registry: true
-
-  build:
-    runs-on: ubuntu-22.04
-    needs: docker-build
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         compiler: [gcc, clang]
         build_type: [debug, release]
+    container: victorbaldin56/bitonic_sort:918b8e65d0fd8fcff3ea167d76df835cb89bcb55
 
     steps:
-      - name: Download Docker image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: bitonic_sort_image
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Load Docker image
-        run: docker load -i bitonic_sort.tar
+    - name: Conan install
+      run: |
+        conan install .
+          -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
+          --output-folder=build
+          --build=missing
 
-      - name: Run build inside container
-        run: |
-          docker run --rm bitonic_sort /bin/bash -c "conan install . \
-          -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile \
-          --output-folder=build \
-          --build=missing &&
-          cmake . -B build -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} &&
-          cmake --build build -j"
+    - name: Configure
+      run: cmake . -B build -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
-    # no tests here because it runs on GPUless runner and we can only check buildability here
-    # tests can be run locally
+    - name: Build
+      run: cmake --build build -j
+
+    - name: Run tests
+      run: cd build && ctest --output-on-failure
