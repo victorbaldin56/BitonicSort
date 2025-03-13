@@ -20,5 +20,4 @@ RUN python3 -m venv .venv && \
     pip install --no-cache-dir conan && \
     conan profile detect --force
 
-WORKDIR /app
 COPY . .
