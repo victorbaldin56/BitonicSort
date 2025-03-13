@@ -50,15 +50,6 @@ jobs:
     #     subject-digest: ${{ steps.push.outputs.digest }}
     #     push-to-registry: true
 
-    - name: Pull Docker image
-      run: docker pull victorbaldin56/bitonic_sort:latest
-
-    - name: Run Docker container
-      run: |
-        docker run \
-          --rm \
-          ${{ secrets.DOCKER_HUB_USERNAME }}/bitonic_sort:latest
-
   build:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
@@ -70,6 +61,15 @@ jobs:
         build_type: [debug, release]
 
     steps:
+    - name: Pull Docker image
+      run: docker pull victorbaldin56/bitonic_sort:latest
+
+    - name: Run Docker container
+      run: |
+        docker run \
+          -it --rm \
+          ${{ secrets.DOCKER_HUB_USERNAME }}/bitonic_sort:latest
+
     - name: Install conan requirements
       run: >
         conan install .
