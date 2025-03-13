@@ -57,7 +57,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: docker-build-and-push
     container:
-      image: ${{ secrets.DOCKER_HUB_USERNAME }}/bitonic_sort:${{ needs.docker-build-and-push.outputs.docker_tag }}
+      image: victorbaldin56/bitonic_sort:${{ env.DOCKER_TAG }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
