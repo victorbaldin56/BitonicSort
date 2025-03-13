@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: docker-build-and-push
     container:
-      image: ${{ secrets.DOCKER_HUB_USERNAME }}/bitonic_sort:latest
+      image: victorbaldin56/bitonic_sort:latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
