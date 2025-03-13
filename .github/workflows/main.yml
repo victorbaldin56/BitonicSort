@@ -65,7 +65,7 @@ jobs:
     steps:
     - name: Install conan requirements
       run: >
-        pushd /github/workspace &&
+        cd /github/workspace &&
         conan install .
         -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
         --output-folder=build
