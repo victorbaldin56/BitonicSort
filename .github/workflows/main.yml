@@ -55,6 +55,8 @@ jobs:
     needs: docker-build-and-push
     container:
       image: victorbaldin56/bitonic_sort:latest
+      volumes:
+        - ${{ github.workspace }}:/workspace
     timeout-minutes: 30
     strategy:
       fail-fast: false
