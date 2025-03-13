@@ -83,16 +83,13 @@ jobs:
         run: docker load -i bitonic_sort.tar
 
       - name: Run build inside container
-        with:
-          image: bitonic_sort:latest
-          options: --rm
-          run: |
-            docker run --rm bitonic_sort /bin/bash -c "conan install .
-            -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
-            --output-folder=build
-            --build=missing &&
-            cmake . -B build --preset conan-${{ matrix.build_type }} &&
-            cmake --build build -j"
+        run: |
+          docker run --rm bitonic_sort /bin/bash -c "conan install .
+          -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
+          --output-folder=build
+          --build=missing &&
+          cmake . -B build --preset conan-${{ matrix.build_type }} &&
+          cmake --build build -j"
 
     # no tests here because it runs on GPUless runner and we can only check buildability here
     # tests can be run locally
