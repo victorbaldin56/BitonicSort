@@ -63,9 +63,12 @@ jobs:
         build_type: [debug, release]
 
     steps:
+    - name: Find
+      run: >
+        find / | grep 'conanfile.py'
+
     - name: Install conan requirements
       run: >
-        cd /github/workspace &&
         conan install .
         -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
         --output-folder=build
