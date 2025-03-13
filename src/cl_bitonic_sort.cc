@@ -91,7 +91,7 @@ cl::Platform BitonicSorter::selectPlatform() {
   if (!selectPlatformByType(CL_DEVICE_TYPE_GPU, platforms, res)) {
     // FIXME
     if (!selectPlatformByType(CL_DEVICE_TYPE_ALL, platforms, res)) {
-      throw std::runtime_error("No OpenCL devices were found");
+      throw std::runtime_error("No suitable OpenCL platforms were found");
     }
   }
   return res;
