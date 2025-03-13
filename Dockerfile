@@ -7,6 +7,7 @@ RUN apt-get update && \
         pocl-opencl-icd \
         ocl-icd-opencl-dev \
         clinfo \
+        clang \
         python3 \
         python3-pip \
         python3-venv \
