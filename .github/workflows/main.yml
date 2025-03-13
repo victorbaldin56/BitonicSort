@@ -1,4 +1,4 @@
-name: CMake on multiple platforms
+name: CMake with multiple configs
 
 on:
   push:
