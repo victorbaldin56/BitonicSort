@@ -55,9 +55,6 @@ jobs:
     needs: docker-build-and-push
     container:
       image: victorbaldin56/bitonic_sort:latest
-      volumes:
-        - ${{ github.workspace }}:/workspace
-      options: --workdir /workspace
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -68,6 +65,7 @@ jobs:
     steps:
     - name: Install conan requirements
       run: >
+        pushd /github/workspace &&
         conan install .
         -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
         --output-folder=build
