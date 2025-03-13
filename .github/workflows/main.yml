@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  docker-setup:
+  docker-build-and-push:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
 
@@ -52,8 +52,10 @@ jobs:
 
   build:
     runs-on: ubuntu-22.04
+    needs: docker-build-and-push
+    container:
+      image: ${{ secrets.DOCKER_HUB_USERNAME }}/bitonic_sort:latest
     timeout-minutes: 30
-    needs: docker-setup
     strategy:
       fail-fast: false
       matrix:
@@ -61,18 +63,20 @@ jobs:
         build_type: [debug, release]
 
     steps:
-    - name: Pull Docker image
-      run: docker pull victorbaldin56/bitonic_sort:latest
+    - name: Install conan requirements
+      run: >
+        conan install .
+        -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
+        --output-folder=build
+        --build=missing
 
-    - name: Run Docker container
-      run: |
-        docker run \
-          --rm \
-          ${{ secrets.DOCKER_HUB_USERNAME }}/bitonic_sort:latest \
-          /bin/bash -c "conan install . \
-            -pr=./ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile \
-            --output-folder=./build \
-            --build=missing && cmake . -B ./build --preset conan-${{ matrix.build_type }} && cmake --build ./build -j"
+    - name: Configure CMake
+      run: >
+        cmake . -B build --preset conan-${{ matrix.build_type }}
+
+    - name: Build
+      run:
+        cmake --build build -j
 
     # no tests here because it runs on GPUless runner and we can only check buildability here
     # tests can be run locally
