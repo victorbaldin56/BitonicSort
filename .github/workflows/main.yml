@@ -31,7 +31,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
       with:
-        images: victorbaldin56/bitonic_sort:latest
+        images: victorbaldin56/bitonic_sort
 
     - name: Build and push Docker image
       id: push
@@ -54,7 +54,8 @@ jobs:
     runs-on: ubuntu-22.04
     needs: docker-build-and-push
     container:
-      image: victorbaldin56/bitonic_sort:latest
+      image: victorbaldin56/bitonic_sort
+      tag: ${{ steps.meta.outputs.tags }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
