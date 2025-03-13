@@ -7,7 +7,7 @@ on:
     branches: [ "master" ]
 
 jobs:
-  docker-build-and-push:
+  docker-builda-and-push:
     runs-on: ubuntu-22.04
     timeout-minutes: 30
 
@@ -40,8 +40,6 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
 
     # - name: Generate artifact attestation
     #   uses: actions/attest-build-provenance@v2
@@ -55,7 +53,6 @@ jobs:
     needs: docker-build-and-push
     container:
       image: victorbaldin56/bitonic_sort
-      tag: ${{ steps.meta.outputs.tags }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
