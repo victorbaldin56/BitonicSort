@@ -48,7 +48,7 @@ jobs:
 
     - name: Save artifacts
       run: |
-        docker save -o bitonic_sort.tar bitonic_sort:latest
+        docker save -o bitonic_sort.tar bitonic_sort
 
     - name: Upload Docker image as artifact
       uses: actions/upload-artifact@v4
