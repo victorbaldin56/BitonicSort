@@ -79,9 +79,9 @@ jobs:
 
       - name: Run build inside container
         run: |
-          docker run --rm bitonic_sort /bin/bash -c "conan install .
-          -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
-          --output-folder=build
+          docker run --rm bitonic_sort /bin/bash -c "conan install . \
+          -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile \
+          --output-folder=build \
           --build=missing &&
           cmake . -B build --preset conan-${{ matrix.build_type }} &&
           cmake --build build -j"
