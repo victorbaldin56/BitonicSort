@@ -70,9 +70,9 @@ jobs:
           --rm \
           ${{ secrets.DOCKER_HUB_USERNAME }}/bitonic_sort:latest \
           /bin/bash -c "conan install . \
-            -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile \
-            --output-folder=build \
-            --build=missing && cmake . -B build --preset conan-${{ matrix.build_type }} && cmake --build build -j"
+            -pr=./ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile \
+            --output-folder=./build \
+            --build=missing && cmake . -B ./build --preset conan-${{ matrix.build_type }} && cmake --build ./build -j"
 
     # no tests here because it runs on GPUless runner and we can only check buildability here
     # tests can be run locally
