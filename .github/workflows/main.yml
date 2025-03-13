@@ -15,7 +15,7 @@ jobs:
       matrix:
         compiler: [gcc, clang]
         build_type: [debug, release]
-    container: victorbaldin56/bitonic_sort:918b8e65d0fd8fcff3ea167d76df835cb89bcb55
+    container: victorbaldin56/bitonic_sort:62b2637c72aed0feaa2d6ce110d4b240de9208a1
 
     steps:
     - name: Checkout
@@ -23,6 +23,7 @@ jobs:
 
     - name: Conan install
       run: |
+        conan profile detect --force &&
         conan install .
           -pr=ci/profiles/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
           --output-folder=build
