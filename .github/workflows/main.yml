@@ -57,6 +57,7 @@ jobs:
       image: victorbaldin56/bitonic_sort:latest
       volumes:
         - ${{ github.workspace }}:/workspace
+      options: --workdir /workspace
     timeout-minutes: 30
     strategy:
       fail-fast: false
