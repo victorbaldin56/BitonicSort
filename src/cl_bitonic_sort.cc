@@ -87,17 +87,33 @@ cl::Platform BitonicSorter::selectPlatform() {
     throw std::runtime_error("No OpenCL platforms were found");
   }
 
-  auto pl_begin = platforms.begin();
-  auto pl_end = platforms.end();
-  auto plit = std::find_if(pl_begin, pl_end, [](auto&& p) {
+  auto res = cl::Platform();
+  if (!selectPlatformByType(CL_DEVICE_TYPE_GPU, platforms, res)) {
+    // FIXME
+    if (!selectPlatformByType(CL_DEVICE_TYPE_ALL, platforms, res)) {
+      throw std::runtime_error("No OpenCL devices were found");
+    }
+  }
+  return res;
+}
+
+bool BitonicSorter::selectPlatformByType(
+    int device_type,
+    const std::vector<cl::Platform>& pls,
+    cl::Platform& pl) {
+  auto pl_begin = pls.cbegin();
+  auto pl_end = pls.cend();
+  auto pl_it = std::find_if(pl_begin, pl_end, [&](auto&& p) {
     auto devs = std::vector<cl::Device>();
-    p.getDevices(CL_DEVICE_TYPE_GPU, &devs);
+    p.getDevices(device_type, &devs);
     return !devs.empty();
   });
-  if (plit == pl_end) {
-    throw std::runtime_error("No OpenCL GPU platforms were found");
+
+  if (pl_it == pl_end) {
+    return false;
   }
-  return *plit;
+  pl = *pl_it;
+  return true;
 }
 
 cl::Device BitonicSorter::selectDevice(cl::Platform pl) {

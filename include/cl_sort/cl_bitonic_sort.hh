@@ -52,6 +52,10 @@ class BitonicSorter final {
   static cl::Device selectDevice(cl::Platform pl);
   static cl::Context getGpuContext(cl::Device dev);
   static std::string readKernelFromFile(const std::filesystem::path& path);
+  static bool selectPlatformByType(
+      int device_type,
+      const std::vector<cl::Platform>& pls,
+      cl::Platform& p);
 
  private:  // helpers
   static void prepareData(std::vector<int>& data);
