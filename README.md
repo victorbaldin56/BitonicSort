@@ -33,6 +33,7 @@ To build the project you have two options:
    ```
 
 1. Detect conan profile:
+
    ```sh
    conan profile detect --force
    ```
