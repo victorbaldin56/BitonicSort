@@ -11,7 +11,7 @@ namespace {
 
 template <typename Integer,
           typename = std::enable_if<std::is_integral_v<Integer>>>
-Integer nextPowerOfTwo(Integer n) {
+constexpr Integer nextPowerOfTwo(Integer n) {
   --n;
   n |= n >> 1;
   n |= n >> 2;
