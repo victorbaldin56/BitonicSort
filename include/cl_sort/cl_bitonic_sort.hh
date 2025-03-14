@@ -32,7 +32,7 @@ class BitonicSorter final {
   BitonicSorter(Config cfg = {})
       : pl_(selectPlatform()),
         dev_(selectDevice(pl_)),
-        ctx_(getGpuContext(dev_)),
+        ctx_(getDeviceContext(dev_)),
         queue_(ctx_, dev_, 0),
         cfg_(cfg),
         shader_(readKernelFromFile(cfg.path_)),
@@ -49,7 +49,7 @@ class BitonicSorter final {
  private:  // constructor helpers
   static cl::Platform selectPlatform();
   static cl::Device selectDevice(const cl::Platform& pl);
-  static cl::Context getGpuContext(const cl::Device& dev);
+  static cl::Context getDeviceContext(const cl::Device& dev);
   static std::string readKernelFromFile(const std::filesystem::path& path);
   static bool selectPlatformByType(
       int device_type,
