@@ -10,8 +10,7 @@ To build the project you have two options:
 1. Use prepared docker container with all suitable environment (recommended):
 
    ```sh
-   docker pull victorbaldin56/bitonic_sort:62b2637c72aed0feaa2d6ce110d4b240de9208a1
-   docker run --platform linux/amd64 -it victorbaldin56/bitonic_sort
+   docker run --platform linux/amd64 -it victorbaldin56/bitonic_sort:9555c9d3684cf182c389ad88e00bb1db97130884
    ```
 
 1. Install all these tools yourself:
