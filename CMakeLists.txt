@@ -15,7 +15,8 @@ target_compile_definitions(bitonic PUBLIC PROJECT_ROOT="${CMAKE_CURRENT_SOURCE_D
 add_subdirectory(bench)
 add_subdirectory(driver)
 
-if (${BUILD_TESTING})
+option(ENABLE_TESTS "Enable testing" ON)
+if (ENABLE_TESTS)
   enable_testing()
   add_subdirectory(tests)
 endif()

@@ -24,8 +24,7 @@ struct Config {
   std::filesystem::path path_ =
       std::filesystem::absolute(PROJECT_ROOT)
           .append("shaders/bitonic_sort.cl");
-  cl::QueueProperties queue_props_ =
-      cl::QueueProperties::Profiling | cl::QueueProperties::OutOfOrder;
+  cl::QueueProperties queue_props_ = cl::QueueProperties::OutOfOrder;
 };
 
 class BitonicSorter final {
@@ -33,7 +32,7 @@ class BitonicSorter final {
   BitonicSorter(Config cfg = {})
       : pl_(selectPlatform()),
         dev_(selectDevice(pl_)),
-        ctx_(getGpuContext(dev_)),
+        ctx_(getDeviceContext(dev_)),
         queue_(ctx_, dev_, 0),
         cfg_(cfg),
         shader_(readKernelFromFile(cfg.path_)),
@@ -49,9 +48,13 @@ class BitonicSorter final {
 
  private:  // constructor helpers
   static cl::Platform selectPlatform();
-  static cl::Device selectDevice(cl::Platform pl);
-  static cl::Context getGpuContext(cl::Device dev);
+  static cl::Device selectDevice(const cl::Platform& pl);
+  static cl::Context getDeviceContext(const cl::Device& dev);
   static std::string readKernelFromFile(const std::filesystem::path& path);
+  static bool selectPlatformByType(
+      int device_type,
+      const std::vector<cl::Platform>& pls,
+      cl::Platform& p);
 
  private:  // helpers
   static void prepareData(std::vector<int>& data);

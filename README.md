@@ -5,12 +5,23 @@ This is OpenCL bitonic sort implementation.
 
 ## Dependencies
 
+To build the project you have two options:
+
+1. Use prepared docker container with all suitable environment (recommended):
+
+   ```sh
+   docker run --platform linux/amd64 -it victorbaldin56/bitonic_sort:9555c9d3684cf182c389ad88e00bb1db97130884
+   ```
+
+1. Install all these tools yourself:
+
 * Git
-* CMake
-* C++ compiler + libstdc++ standard >= 17
+* CMake >= 3.14 and compatible build system
+* C++17-compatible compiler
 * Python3
 * `pip`
 * OpenCL driver library
+* Conan
 
 ## Build
 
@@ -21,17 +32,9 @@ This is OpenCL bitonic sort implementation.
    cd BitonicSort
    ```
 
-1. Create virtual environment for Python:
+1. Detect conan profile:
 
    ```sh
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
-
-1. Install Conan:
-
-   ```sh
-   pip3 install conan
    conan profile detect --force
    ```
 

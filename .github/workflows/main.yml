@@ -1,4 +1,4 @@
-name: CMake on multiple platforms
+name: CMake with multiple configs
 
 on:
   push:
@@ -7,55 +7,29 @@ on:
     branches: [ "master" ]
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
+  build-and-test:
+    runs-on: ubuntu-22.04
     timeout-minutes: 30
-
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04]
-        compiler: [gcc, clang]
         build_type: [debug, release]
+    container: victorbaldin56/bitonic_sort:9555c9d3684cf182c389ad88e00bb1db97130884
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
+    - name: Conan install
       run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        conan profile detect --force &&
+        conan install . \
+          -pr=ci/profiles/${{ matrix.build_type }}.profile \
+          --output-folder=build \
+          --build=missing
 
-    - name: Install system packages
-      run: |
-        if [ "${{ matrix.os }}" == "ubuntu-22.04" ]; then
-          sudo apt-get -y update &&
-          sudo apt-get install python3 pip g++-12 clang-14 binutils ocl-icd-opencl-dev
-        fi
-
-    - name: Install conan and set venv
-      run: python3 -m venv .venv;
-           source .venv/bin/activate;
-           echo PATH=$PATH >> $GITHUB_ENV;
-           pip install conan==2.12.1;
-
-    - name: Install conan requirements
-      run: >
-        conan profile detect --force;
-        conan install .
-        -pr=ci/profiles/${{ matrix.os }}/${{ matrix.compiler }}_${{ matrix.build_type }}.profile
-        --output-folder=build
-        --build=missing
-
-    - name: Configure CMake
-      run: >
-        cmake . -B build --preset conan-${{ matrix.build_type }}
+    - name: Configure
+      run: cmake . -B build -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
     - name: Build
-      run:
-        cmake --build build -j
-
-    # no tests here because it runs on GPUless runner and we can only check buildability here
-    # tests can be run locally
+      run: cmake --build build -j

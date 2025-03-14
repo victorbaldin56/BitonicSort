@@ -11,7 +11,7 @@ namespace {
 
 template <typename Integer,
           typename = std::enable_if<std::is_integral_v<Integer>>>
-Integer nextPowerOfTwo(Integer n) {
+constexpr Integer nextPowerOfTwo(Integer n) {
   --n;
   n |= n >> 1;
   n |= n >> 2;
@@ -87,29 +87,47 @@ cl::Platform BitonicSorter::selectPlatform() {
     throw std::runtime_error("No OpenCL platforms were found");
   }
 
-  auto pl_begin = platforms.begin();
-  auto pl_end = platforms.end();
-  auto plit = std::find_if(pl_begin, pl_end, [](auto&& p) {
-    auto devs = std::vector<cl::Device>();
-    p.getDevices(CL_DEVICE_TYPE_GPU, &devs);
-    return !devs.empty();
-  });
-  if (plit == pl_end) {
-    throw std::runtime_error("No OpenCL GPU platforms were found");
+  auto res = cl::Platform();
+  if (!selectPlatformByType(CL_DEVICE_TYPE_GPU, platforms, res)) {
+    if (!selectPlatformByType(CL_DEVICE_TYPE_CPU, platforms, res)) {
+      throw std::runtime_error("No OpenCL platforms with devices were found");
+    }
   }
-  return *plit;
+  return res;
 }
 
-cl::Device BitonicSorter::selectDevice(cl::Platform pl) {
+bool BitonicSorter::selectPlatformByType(
+    int device_type,
+    const std::vector<cl::Platform>& pls,
+    cl::Platform& pl) {
+  auto pl_begin = pls.cbegin();
+  auto pl_end = pls.cend();
+  auto pl_it = std::find_if(pl_begin, pl_end, [&](auto&& p) {
+    auto devs = std::vector<cl::Device>();
+    p.getDevices(device_type, &devs);
+    return !devs.empty();
+  });
+
+  if (pl_it == pl_end) {
+    return false;
+  }
+  pl = *pl_it;
+  return true;
+}
+
+cl::Device BitonicSorter::selectDevice(const cl::Platform& pl) {
   auto devices = std::vector<cl::Device>();
   pl.getDevices(CL_DEVICE_TYPE_GPU, &devices);
   if (devices.empty()) {
-    throw std::runtime_error("No OpenCL devices were found");
+    pl.getDevices(CL_DEVICE_TYPE_CPU, &devices);
+    if (devices.empty()) {
+      throw std::runtime_error("No OpenCL devices were found");
+    }
   }
   return devices.front();
 }
 
-cl::Context BitonicSorter::getGpuContext(cl::Device dev) {
+cl::Context BitonicSorter::getDeviceContext(const cl::Device& dev) {
   return cl::Context(dev);
 }
 
