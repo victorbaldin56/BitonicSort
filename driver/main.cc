@@ -4,9 +4,8 @@
 
 int main() try {
   auto n = std::size_t{};
-  std::cin.exceptions(std::ios::failbit | std::ios::eofbit);
+  std::cin.exceptions(std::ios::failbit);
   std::cin >> n;
-
   auto data = std::vector<int>();
   data.reserve(n);
   std::copy_n(std::istream_iterator<int>(std::cin),
