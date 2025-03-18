@@ -9,11 +9,8 @@ int main() try {
 
   auto data = std::vector<int>();
   data.reserve(n);
-  while (data.size() < n) {
-    auto e = int{};
-    std::cin >> e;
-    data.push_back(e);
-  }
+  std::copy_n(std::istream_iterator<int>(std::cin),
+              n, std::back_inserter(data));
 
   bts::BitonicSorter app;
   app.sort(data);
