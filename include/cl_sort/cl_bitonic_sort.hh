@@ -2,40 +2,30 @@
 
 #include <algorithm>
 #include <chrono>
-#include <random>
-#include <iostream>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
+#include <random>
 #include <sstream>
 
-#ifndef CL_HPP_TARGET_OPENCL_VERSION
-#define CL_HPP_MINIMUM_OPENCL_VERSION 120
-#define CL_HPP_TARGET_OPENCL_VERSION 120
-#endif
-
-#define CL_HPP_CL_1_2_DEFAULT_BUILD
-#define CL_HPP_ENABLE_EXCEPTIONS
-
-#include "CL/opencl.hpp"
+#include "cl_helpers/cl_helpers.hh"
 
 namespace bts {
 
 struct Config {
   std::filesystem::path path_ =
-      std::filesystem::absolute(PROJECT_ROOT)
-          .append("shaders/bitonic_sort.cl");
-  cl::QueueProperties queue_props_ = cl::QueueProperties::OutOfOrder;
+      std::filesystem::absolute(PROJECT_ROOT).append("shaders/bitonic_sort.cl");
 };
 
 class BitonicSorter final {
  public:
   BitonicSorter(Config cfg = {})
-      : pl_(selectPlatform()),
-        dev_(selectDevice(pl_)),
-        ctx_(getDeviceContext(dev_)),
+      : pl_(cl_helpers::selectPlatform()),
+        dev_(cl_helpers::selectDevice(pl_)),
+        ctx_(cl_helpers::getDeviceContext(dev_)),
         queue_(ctx_, dev_, 0),
         cfg_(cfg),
-        shader_(readKernelFromFile(cfg.path_)),
+        shader_(cl_helpers::readKernelFromFile(cfg.path_)),
         program_(ctx_, shader_, true) {}
 
   void sort(std::vector<int>& data) const;
@@ -45,16 +35,6 @@ class BitonicSorter final {
                  std::size_t global_size,
                  std::size_t local_size,
                  std::vector<cl::Event>& events) const;
-
- private:  // constructor helpers
-  static cl::Platform selectPlatform();
-  static cl::Device selectDevice(const cl::Platform& pl);
-  static cl::Context getDeviceContext(const cl::Device& dev);
-  static std::string readKernelFromFile(const std::filesystem::path& path);
-  static bool selectPlatformByType(
-      int device_type,
-      const std::vector<cl::Platform>& pls,
-      cl::Platform& p);
 
  private:  // helpers
   static void prepareData(std::vector<int>& data);
