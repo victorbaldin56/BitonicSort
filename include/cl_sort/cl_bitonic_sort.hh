@@ -30,12 +30,6 @@ class BitonicSorter final {
 
   void sort(std::vector<int>& data) const;
 
- private:
-  void runKernel(const cl::Kernel& kernel,
-                 std::size_t global_size,
-                 std::size_t local_size,
-                 std::vector<cl::Event>& events) const;
-
  private:  // helpers
   static void prepareData(std::vector<int>& data);
 

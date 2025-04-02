@@ -20,5 +20,8 @@ cl::Context getDeviceContext(const cl::Device& dev);
 std::string readKernelFromFile(const std::filesystem::path& path);
 bool selectPlatformByType(int device_type, const std::vector<cl::Platform>& pls,
                           cl::Platform& p);
+void runKernel(const cl::CommandQueue& queue, const cl::Kernel& kernel,
+               std::size_t global_size, std::size_t local_size,
+               std::vector<cl::Event>& events);
 
 }  // namespace cl_helpers

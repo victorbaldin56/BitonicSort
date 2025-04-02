@@ -67,4 +67,13 @@ std::string readKernelFromFile(const std::filesystem::path& path) {
   return code;
 }
 
+void runKernel(const cl::CommandQueue& queue, const cl::Kernel& kernel,
+               std::size_t global_size, std::size_t local_size,
+               std::vector<cl::Event>& events) {
+  auto evt = cl::Event();
+  queue.enqueueNDRangeKernel(kernel, cl::NullRange, global_size, local_size,
+                             nullptr, &evt);
+  events.push_back(evt);
+}
+
 }  // namespace cl_helpers

@@ -49,7 +49,7 @@ void BitonicSorter::sort(std::vector<int>& data) const {
   bitonic_split.setArg(1, local);
 
   auto events = std::vector<cl::Event>();
-  runKernel(bitonic_split, global_size, local_size, events);
+  cl_helpers::runKernel(queue_, bitonic_split, global_size, local_size, events);
   events.front().wait();
 
   events.clear();
@@ -60,7 +60,8 @@ void BitonicSorter::sort(std::vector<int>& data) const {
       bitonic_merge.setArg(1, stage);
       bitonic_merge.setArg(2, step);
 
-      runKernel(bitonic_merge, global_size, local_size, events);
+      cl_helpers::runKernel(queue_, bitonic_merge, global_size, local_size,
+                            events);
     }
   }
 
@@ -68,16 +69,6 @@ void BitonicSorter::sort(std::vector<int>& data) const {
 
   cl::copy(queue_, buffer, data.begin(), data.begin() + old_data_sz);
   data.resize(old_data_sz);
-}
-
-void BitonicSorter::runKernel(const cl::Kernel& kernel,
-                              std::size_t global_size,
-                              std::size_t local_size,
-                              std::vector<cl::Event>& events) const {
-  auto evt = cl::Event();
-  queue_.enqueueNDRangeKernel(
-      kernel, cl::NullRange, global_size, local_size, nullptr, &evt);
-  events.push_back(evt);
 }
 
 /**
