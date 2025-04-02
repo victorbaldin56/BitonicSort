@@ -60,8 +60,8 @@ class ClApplication final {
     return cl::copy(queue_, buf, first, last);
   }
 
-  auto getKernel(const char* kname) const {
-    return cl::Kernel(program_, kname);
+  auto getKernel(const std::string& kname) const {
+    return cl::Kernel(program_, kname.c_str());
   }
 
  private:
