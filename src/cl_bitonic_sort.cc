@@ -27,7 +27,7 @@ constexpr Integer nextPowerOfTwo(Integer n) {
 
 namespace bts {
 
-void BitonicSorter::sort(std::vector<int>& data) {
+void BitonicSorter::sort(std::vector<int>& data) const {
   auto old_data_sz = data.size();
   prepareData(data);
   auto new_data_sz = data.size();
@@ -73,7 +73,7 @@ void BitonicSorter::sort(std::vector<int>& data) {
 void BitonicSorter::runKernel(const cl::Kernel& kernel,
                               std::size_t global_size,
                               std::size_t local_size,
-                              std::vector<cl::Event>& events) {
+                              std::vector<cl::Event>& events) const {
   auto evt = cl::Event();
   queue_.enqueueNDRangeKernel(
       kernel, cl::NullRange, global_size, local_size, nullptr, &evt);

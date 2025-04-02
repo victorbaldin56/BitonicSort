@@ -38,13 +38,13 @@ class BitonicSorter final {
         shader_(readKernelFromFile(cfg.path_)),
         program_(ctx_, shader_, true) {}
 
-  void sort(std::vector<int>& data);
+  void sort(std::vector<int>& data) const;
 
  private:
   void runKernel(const cl::Kernel& kernel,
                  std::size_t global_size,
                  std::size_t local_size,
-                 std::vector<cl::Event>& events);
+                 std::vector<cl::Event>& events) const;
 
  private:  // constructor helpers
   static cl::Platform selectPlatform();
