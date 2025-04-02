@@ -153,12 +153,7 @@ std::string BitonicSorter::readKernelFromFile(
 void BitonicSorter::prepareData(std::vector<int>& data) {
   auto old_sz = data.size();
   auto new_sz = nextPowerOfTwo(old_sz);
-  data.reserve(new_sz);
-
-  auto elem = std::numeric_limits<int>::max();  // to not affect final result
-  while (data.size() < new_sz) {
-    data.push_back(elem);
-  }
+  data.resize(new_sz, std::numeric_limits<int>::max());
 }
 
 } // namespace ocl
