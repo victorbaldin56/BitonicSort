@@ -10,8 +10,8 @@ constexpr auto kNumIterations = 1;
 class SortCompareFixture : public benchmark::Fixture {
 public:
   void SetUp(const benchmark::State& state) override {
-    input_dir_ =
-        std::filesystem::absolute(PROJECT_ROOT).append(kRelativeInputPath);
+    input_dir_ = std::filesystem::absolute(__FILE__).parent_path().append(
+        kRelativeInputPath);
 
     test_num_ = state.range(0);
     loadTestData(test_num_);
@@ -45,15 +45,15 @@ public:
 
   std::filesystem::path input_dir_;
   std::vector<int> original_data_;
-  bts::BitonicSorter sorter_;
+  cl_sort::BitonicSorter sorter_;
   int test_num_;
 
   static constexpr auto kBenchNum = 10;
-  static constexpr auto kRelativeInputPath = "tests/e2e/generated/input";
+  static constexpr auto kRelativeInputPath = "data";
 };
 
 BENCHMARK_DEFINE_F(SortCompareFixture, CompareSorts)(benchmark::State& state) {
-  auto bitonic_sorter = bts::BitonicSorter();
+  auto bitonic_sorter = cl_sort::BitonicSorter();
 
   for (auto _ : state) {
     state.PauseTiming();

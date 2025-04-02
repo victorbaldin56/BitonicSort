@@ -1,6 +1,6 @@
 #include <cstdlib>
 
-#include "cl_application/cl_bitonic_sort.hh"
+#include "cl_sort/cl_bitonic_sort.hh"
 
 int main() try {
   auto n = std::size_t{};
@@ -11,7 +11,7 @@ int main() try {
   std::copy_n(std::istream_iterator<int>(std::cin),
               n, std::back_inserter(data));
 
-  bts::BitonicSorter app;
+  cl_sort::BitonicSorter app;
   app.sort(data);
   std::copy(data.begin(), data.end(),
             std::ostream_iterator<int>(std::cout, " "));

@@ -1,11 +1,11 @@
-#include "cl_application/cl_application.hh"
+#include "cl_app/cl_app.hh"
 
 #include <fstream>
 #include <sstream>
 
-namespace cl_helpers {
+namespace cl_app {
 
-cl::Platform selectPlatform() {
+cl::Platform ClApplication::selectPlatform() {
   std::vector<cl::Platform> platforms;
   cl::Platform::get(&platforms);
   if (platforms.empty()) {
@@ -21,8 +21,9 @@ cl::Platform selectPlatform() {
   return res;
 }
 
-bool selectPlatformByType(int device_type, const std::vector<cl::Platform>& pls,
-                          cl::Platform& pl) {
+bool ClApplication::selectPlatformByType(int device_type,
+                                         const std::vector<cl::Platform>& pls,
+                                         cl::Platform& pl) {
   auto pl_begin = pls.cbegin();
   auto pl_end = pls.cend();
   auto pl_it = std::find_if(pl_begin, pl_end, [&](auto&& p) {
@@ -38,7 +39,7 @@ bool selectPlatformByType(int device_type, const std::vector<cl::Platform>& pls,
   return true;
 }
 
-cl::Device selectDevice(const cl::Platform& pl) {
+cl::Device ClApplication::selectDevice(const cl::Platform& pl) {
   auto devices = std::vector<cl::Device>();
   pl.getDevices(CL_DEVICE_TYPE_GPU, &devices);
   if (devices.empty()) {
@@ -50,9 +51,12 @@ cl::Device selectDevice(const cl::Platform& pl) {
   return devices.front();
 }
 
-cl::Context getDeviceContext(const cl::Device& dev) { return cl::Context(dev); }
+cl::Context ClApplication::getDeviceContext(const cl::Device& dev) {
+  return cl::Context(dev);
+}
 
-std::string readKernelFromFile(const std::filesystem::path& path) {
+std::string ClApplication::readKernelFromFile(
+    const std::filesystem::path& path) {
   auto code = std::string();
   auto shader_file = std::ifstream();
   shader_file.open(path);
@@ -67,13 +71,13 @@ std::string readKernelFromFile(const std::filesystem::path& path) {
   return code;
 }
 
-void runKernel(const cl::CommandQueue& queue, const cl::Kernel& kernel,
-               std::size_t global_size, std::size_t local_size,
-               std::vector<cl::Event>& events) {
+void ClApplication::runKernel(const cl::Kernel& kernel, std::size_t global_size,
+                              std::size_t local_size,
+                              std::vector<cl::Event>& events) const {
   auto evt = cl::Event();
-  queue.enqueueNDRangeKernel(kernel, cl::NullRange, global_size, local_size,
-                             nullptr, &evt);
+  queue_.enqueueNDRangeKernel(kernel, cl::NullRange, global_size, local_size,
+                              nullptr, &evt);
   events.push_back(evt);
 }
 
-}  // namespace cl_helpers
+}  // namespace cl_app
