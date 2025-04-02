@@ -45,10 +45,6 @@ BitonicSorter::BitonicSorter()
                         .append("bitonic_sort.cl")}) {}
 
 void BitonicSorter::sort(std::vector<int>& data) const {
-  auto&& ctx = app_.context();
-  auto&& queue = app_.queue();
-  auto&& program = app_.program();
-
   auto old_data_sz = data.size();
   prepareData(data);
   auto new_data_sz = data.size();
@@ -57,14 +53,15 @@ void BitonicSorter::sort(std::vector<int>& data) const {
   auto global_size = new_data_sz;
   auto local_size = std::min(global_size, kMaxLocalSize);
 
-  auto buffer = cl::Buffer(ctx, CL_MEM_READ_WRITE, sizeof(int) * new_data_sz);
-  cl::copy(queue, data.begin(), data.end(), buffer);
+  auto buffer =
+      app_.allocateDeviceBuffer(CL_MEM_READ_WRITE, sizeof(int) * new_data_sz);
+  app_.copy(data.begin(), data.end(), buffer);
 
   auto local =
       static_cast<cl::LocalSpaceArg>(cl::Local(local_size * sizeof(int)));
 
-  auto bitonic_split = cl::Kernel(program, "bitonicSplit");
-  auto bitonic_merge = cl::Kernel(program, "bitonicMerge");
+  auto bitonic_split = app_.getKernel("bitonicSplit");
+  auto bitonic_merge = app_.getKernel("bitonicMerge");
 
   bitonic_split.setArg(0, buffer);
   bitonic_split.setArg(1, local);
@@ -87,7 +84,7 @@ void BitonicSorter::sort(std::vector<int>& data) const {
 
   std::for_each(events.begin(), events.end(), [](auto& evt) { evt.wait(); });
 
-  cl::copy(queue, buffer, data.begin(), data.begin() + old_data_sz);
+  app_.copy(buffer, data.begin(), data.begin() + old_data_sz);
   data.resize(old_data_sz);
 }
 

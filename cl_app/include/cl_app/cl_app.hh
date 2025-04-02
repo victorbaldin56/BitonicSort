@@ -1,6 +1,8 @@
 #pragma once
 
 #include <filesystem>
+#include <iterator>
+#include <type_traits>
 
 #ifndef CL_HPP_TARGET_OPENCL_VERSION
 #define CL_HPP_MINIMUM_OPENCL_VERSION 120
@@ -13,6 +15,11 @@
 #include "CL/opencl.hpp"
 
 namespace cl_app {
+
+template <typename It>
+inline constexpr bool IsInputIterator =
+    std::is_base_of_v<std::input_iterator_tag,
+                      typename std::iterator_traits<It>::iterator_category>;
 
 struct Config final {
   std::filesystem::path path;
@@ -31,9 +38,23 @@ class ClApplication final {
 
   void runKernel(const cl::Kernel& kernel, std::size_t global_size,
                  std::size_t local_size, std::vector<cl::Event>& events) const;
-  const cl::Context& context() const noexcept { return ctx_; }
-  const cl::Program& program() const noexcept { return program_; }
-  const cl::CommandQueue& queue() const noexcept { return queue_; }
+
+  auto allocateDeviceBuffer(cl_mem_flags mode, std::size_t sz) const {
+    return cl::Buffer(ctx_, mode, sz);
+  }
+
+  template <typename It, typename = std::enable_if_t<IsInputIterator<It>>>
+  auto copy(It first, It last, cl::Buffer& buf) const {
+    return cl::copy(queue_, first, last, buf);
+  }
+  template <typename It, typename = std::enable_if_t<IsInputIterator<It>>>
+  auto copy(cl::Buffer& buf, It first, It last) const {
+    return cl::copy(queue_, buf, first, last);
+  }
+
+  auto getKernel(const char* kname) const {
+    return cl::Kernel(program_, kname);
+  }
 
  private:
   cl::Platform selectPlatform();
