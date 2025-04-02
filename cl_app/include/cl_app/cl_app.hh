@@ -21,6 +21,14 @@ inline constexpr bool IsInputIterator =
     std::is_base_of_v<std::input_iterator_tag,
                       typename std::iterator_traits<It>::iterator_category>;
 
+template <typename It>
+inline constexpr bool IsOutputIterator =
+    std::is_base_of_v<std::input_iterator_tag,
+                      typename std::iterator_traits<It>::iterator_category>;
+
+template <typename It>
+inline constexpr bool IsIterator = IsInputIterator<It> || IsOutputIterator<It>;
+
 struct Config final {
   std::filesystem::path path;
 };
@@ -47,7 +55,7 @@ class ClApplication final {
   auto copy(It first, It last, cl::Buffer& buf) const {
     return cl::copy(queue_, first, last, buf);
   }
-  template <typename It, typename = std::enable_if_t<IsInputIterator<It>>>
+  template <typename It, typename = std::enable_if_t<IsIterator<It>>>
   auto copy(cl::Buffer& buf, It first, It last) const {
     return cl::copy(queue_, buf, first, last);
   }
