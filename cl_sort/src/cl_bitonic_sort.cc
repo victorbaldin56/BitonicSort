@@ -39,10 +39,10 @@ void prepareData(std::vector<int>& data) {
 namespace cl_sort {
 
 BitonicSorter::BitonicSorter()
-    : app_({.path = std::filesystem::absolute(__FILE__)
-                        .parent_path()
-                        .append("shaders")
-                        .append("bitonic_sort.cl")}) {}
+    : app_(std::filesystem::absolute(__FILE__)
+               .parent_path()
+               .append("shaders")
+               .append("bitonic_sort.cl")) {}
 
 void BitonicSorter::sort(std::vector<int>& data) const {
   auto old_data_sz = data.size();
@@ -54,7 +54,7 @@ void BitonicSorter::sort(std::vector<int>& data) const {
   auto local_size = std::min(global_size, kMaxLocalSize);
 
   auto buffer =
-      app_.allocateDeviceBuffer(CL_MEM_READ_WRITE, sizeof(int) * new_data_sz);
+      app_.allocateBuffer(CL_MEM_READ_WRITE, sizeof(int) * new_data_sz);
   app_.copy(data.begin(), data.end(), buffer);
 
   auto local =
