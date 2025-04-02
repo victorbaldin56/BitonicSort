@@ -1,4 +1,4 @@
-#include "cl_helpers/cl_helpers.hh"
+#include "cl_application/cl_application.hh"
 
 #include <fstream>
 #include <sstream>

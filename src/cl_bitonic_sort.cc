@@ -2,7 +2,7 @@
  * Bitonic sort OpenCL implementation.
  */
 
-#include "cl_sort/cl_bitonic_sort.hh"
+#include "cl_application/cl_bitonic_sort.hh"
 
 #include <cassert>
 #include <numeric>

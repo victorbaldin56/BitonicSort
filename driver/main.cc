@@ -1,6 +1,6 @@
 #include <cstdlib>
 
-#include "cl_sort/cl_bitonic_sort.hh"
+#include "cl_application/cl_bitonic_sort.hh"
 
 int main() try {
   auto n = std::size_t{};

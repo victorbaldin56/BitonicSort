@@ -8,7 +8,7 @@
 #include <random>
 #include <sstream>
 
-#include "cl_helpers/cl_helpers.hh"
+#include "cl_application.hh"
 
 namespace bts {
 
