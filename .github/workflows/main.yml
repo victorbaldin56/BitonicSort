@@ -20,7 +20,10 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Install OpenCL
-      run: sudo apt install pocl-opencl-icd
+      run: sudo apt install pocl-opencl-icd clinfo
+
+    - name: Debug
+      run: clinfo
 
     - name: Setup env and install conan
       run: python3 -m venv .venv;
