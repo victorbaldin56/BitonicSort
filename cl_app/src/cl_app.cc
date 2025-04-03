@@ -7,15 +7,35 @@
 
 namespace {
 
-template <typename UnaryPred, typename ErrorHandler>
-auto findPlatform(const std::vector<cl::Platform>& pls, UnaryPred pred,
-                  ErrorHandler ehnd) {
-  auto pl_begin = pls.cbegin();
-  auto pl_end = pls.cend();
-  auto it = std::find_if(pl_begin, pl_end, pred);
-  if (it == pl_end) {
-    ehnd();
+auto findPlatform(const std::string& name) {
+  std::vector<cl::Platform> pls;
+  cl::Platform::get(&pls);
+  if (pls.empty()) {
+    throw std::runtime_error("No OpenCL platforms were found");
   }
+
+  auto pls_begin = pls.cbegin();
+  auto pls_end = pls.cend();
+  auto it = std::find_if(pls_begin, pls_end, [&](const cl::Platform& p) {
+    return p.getInfo<CL_PLATFORM_NAME>() == name;
+  });
+  if (it == pls_end) {
+    throw std::runtime_error("OpenCL platform '" + name + "' not found");
+  }
+
+  return *it;
+}
+
+auto findDevice(const std::vector<cl::Device>& devs, const std::string& name) {
+  auto devs_begin = devs.cbegin();
+  auto devs_end = devs.cend();
+  auto it = std::find_if(devs_begin, devs_end, [&](const cl::Device& dev) {
+    return dev.getInfo<CL_DEVICE_NAME>() == name;
+  });
+  if (it == devs_end) {
+    throw std::runtime_error("OpenCL device '" + name + "' not found");
+  }
+
   return *it;
 }
 
@@ -24,84 +44,21 @@ auto findPlatform(const std::vector<cl::Platform>& pls, UnaryPred pred,
 namespace cl_app {
 
 cl::Platform ClApplication::selectPlatform(const Config& config) {
-  std::vector<cl::Platform> pls;
-  cl::Platform::get(&pls);
-  if (pls.empty()) {
-    throw std::runtime_error("No OpenCL platforms were found");
-  }
-
-  cl::Platform res;
-  if (config.platform_name.has_value()) {
-    auto ehnd = [&]() {
-      auto what = "No OpenCL platforms named '" + config.platform_name.value() +
-                  "' were found";
-      throw std::runtime_error(what);
-    };
-    auto pred = [&](const cl::Platform& p) {
-      return p.getInfo<CL_PLATFORM_NAME>() == config.platform_name.value();
-    };
-    res = findPlatform(pls, pred, ehnd);
-
-    std::vector<cl::Device> devs;
-    res.getDevices(CL_DEVICE_TYPE_ALL, &devs);
-    if (devs.empty()) {
-      throw std::runtime_error(
-          "No OpenCL devices were found on selected platform");
-    }
-  } else {
-    auto ehnd = []() {
-      throw std::runtime_error("No OpenCL devices were found");
-    };
-    auto pred = [](auto&& p) {
-      std::vector<cl::Device> devs;
-      p.getDevices(CL_DEVICE_TYPE_ALL, &devs);
-      return !devs.empty();
-    };
-    res = findPlatform(pls, pred, ehnd);
-  }
-
-  return res;
+  return config.platform_name.has_value()
+             ? findPlatform(config.platform_name.value())
+             : cl::Platform::getDefault();
 }
 
 cl::Device ClApplication::selectDevice(const cl::Platform& pl,
                                        const Config& cfg) {
   std::vector<cl::Device> devs;
   pl.getDevices(CL_DEVICE_TYPE_ALL, &devs);
-  assert(!devs.empty());
-
-  if (!cfg.device_name.has_value()) {
-    return devs.front();
+  if (devs.empty()) {
+    throw std::runtime_error("No OpenCL devices in platform were found");
   }
 
-  auto devs_begin = devs.cbegin();
-  auto devs_end = devs.cend();
-  auto it = std::find_if(devs_begin, devs_end, [&](const cl::Device& d) {
-    return d.getInfo<CL_DEVICE_NAME>() == cfg.device_name.value();
-  });
-  if (it == devs_end) {
-    throw std::runtime_error("No OpenCL devices named '" +
-                             cfg.device_name.value() + "' were found");
-  }
-
-  return *it;
-}
-
-bool ClApplication::selectPlatformByType(int device_type,
-                                         const std::vector<cl::Platform>& pls,
-                                         cl::Platform& pl) {
-  auto pl_begin = pls.cbegin();
-  auto pl_end = pls.cend();
-  auto pl_it = std::find_if(pl_begin, pl_end, [&](auto&& p) {
-    auto devs = std::vector<cl::Device>();
-    p.getDevices(device_type, &devs);
-    return !devs.empty();
-  });
-
-  if (pl_it == pl_end) {
-    return false;
-  }
-  pl = *pl_it;
-  return true;
+  return cfg.device_name.has_value() ? findDevice(devs, cfg.device_name.value())
+                                     : devs.front();
 }
 
 std::string ClApplication::loadShader(const std::filesystem::path& path) {

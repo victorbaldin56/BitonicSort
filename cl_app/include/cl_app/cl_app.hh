@@ -64,9 +64,6 @@ class ClApplication final {
   static cl::Platform selectPlatform(const Config& config);
   static cl::Device selectDevice(const cl::Platform& pl, const Config& cfg);
   static std::string loadShader(const std::filesystem::path& path);
-  static bool selectPlatformByType(int device_type,
-                                   const std::vector<cl::Platform>& pls,
-                                   cl::Platform& p);
   static cl::Context getDeviceContext(const cl::Device& dev) {
     return cl::Context(dev);
   }
