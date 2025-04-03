@@ -88,8 +88,10 @@ bitonic sort is 1.6-2.3 times faster
 than `std::sort` in average in
 10 tested benchmarks.
 
-To test on your own device, it is better to set OpenCL platform and device by its names.
-To get platforms and devices available in your system, install `clinfo` utility and run
+To test on your own device, it is better to set OpenCL
+platform and device by its names.
+To get platforms and devices available in your system,
+install `clinfo` utility and run
 
 ```sh
 clinfo
