@@ -14,7 +14,7 @@ namespace cl_sort {
 
 class BitonicSorter final {
  public:
-  BitonicSorter();
+  BitonicSorter(const cl_app::Config& cfg = cl_app::readConfig());
   void sort(std::vector<int>& data) const;
 
  private:

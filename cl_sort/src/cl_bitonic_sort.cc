@@ -38,11 +38,12 @@ void prepareData(std::vector<int>& data) {
 
 namespace cl_sort {
 
-BitonicSorter::BitonicSorter()
+BitonicSorter::BitonicSorter(const cl_app::Config& cfg)
     : app_(std::filesystem::absolute(__FILE__)
                .parent_path()
                .append("shaders")
-               .append("bitonic_sort.cl")) {}
+               .append("bitonic_sort.cl"),
+           cfg) {}
 
 void BitonicSorter::sort(std::vector<int>& data) const {
   auto old_data_sz = data.size();

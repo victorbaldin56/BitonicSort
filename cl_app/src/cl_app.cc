@@ -1,6 +1,7 @@
 #include "cl_app/cl_app.hh"
 
 #include <cassert>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <sstream>
@@ -42,6 +43,20 @@ auto findDevice(const std::vector<cl::Device>& devs, const std::string& name) {
 }  // namespace
 
 namespace cl_app {
+
+Config readConfig() {
+  auto pname = std::getenv("CL_APP_PLATFORM_NAME");
+  auto dname = std::getenv("CL_APP_DEVICE_NAME");
+
+  Config res;
+  if (pname) {
+    res.platform_name = pname;
+  }
+  if (dname) {
+    res.device_name = dname;
+  }
+  return res;
+}
 
 cl::Platform ClApplication::selectPlatform(const Config& config) {
   return config.platform_name.has_value()

@@ -22,10 +22,12 @@ struct Config final {
   std::optional<std::string> device_name;
 };
 
+Config readConfig();
+
 class ClApplication final {
  public:
   ClApplication(const std::filesystem::path& shader_path,
-                const Config& cfg = {})
+                const Config& cfg = readConfig())
       : pl_(selectPlatform(cfg)),
         dev_(selectDevice(pl_, cfg)),
         ctx_(getDeviceContext(dev_)),

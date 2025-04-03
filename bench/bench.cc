@@ -53,7 +53,7 @@ public:
 };
 
 BENCHMARK_DEFINE_F(SortCompareFixture, CompareSorts)(benchmark::State& state) {
-  auto bitonic_sorter = cl_sort::BitonicSorter();
+  cl_sort::BitonicSorter bitonic_sorter;
 
   for (auto _ : state) {
     state.PauseTiming();
