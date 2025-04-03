@@ -17,8 +17,6 @@
 
 namespace cl_app {
 
-void dumpAllDevices(const std::vector<cl::Platform>& pls, std::ostream& os);
-
 struct Config final {
   std::optional<std::string> platform_name;
   std::optional<std::string> device_name;
@@ -28,17 +26,13 @@ class ClApplication final {
  public:
   ClApplication(const std::filesystem::path& shader_path,
                 const Config& cfg = {})
-      : pls_(initPlatforms()),
-        pl_(selectPlatform(pls_, cfg)),
+      : pl_(selectPlatform(cfg)),
         dev_(selectDevice(pl_, cfg)),
         ctx_(getDeviceContext(dev_)),
         queue_(ctx_, dev_, 0),
         cfg_(cfg),
         shader_(loadShader(shader_path)),
         program_(ctx_, shader_, true) {}
-
- public:
-  const std::vector<cl::Platform>& getPlatforms() const { return pls_; }
 
  public:
   auto allocateBuffer(cl_mem_flags mode, std::size_t sz) const {
@@ -67,9 +61,7 @@ class ClApplication final {
   }
 
  private:
-  static std::vector<cl::Platform> initPlatforms();
-  static cl::Platform selectPlatform(const std::vector<cl::Platform>& pls,
-                                     const Config& config);
+  static cl::Platform selectPlatform(const Config& config);
   static cl::Device selectDevice(const cl::Platform& pl, const Config& cfg);
   static std::string loadShader(const std::filesystem::path& path);
   static bool selectPlatformByType(int device_type,
@@ -80,7 +72,6 @@ class ClApplication final {
   }
 
  private:
-  std::vector<cl::Platform> pls_;
   cl::Platform pl_;
   cl::Device dev_;
   cl::Context ctx_;

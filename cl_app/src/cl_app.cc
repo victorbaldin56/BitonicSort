@@ -23,33 +23,13 @@ auto findPlatform(const std::vector<cl::Platform>& pls, UnaryPred pred,
 
 namespace cl_app {
 
-/**
- * Dumps all platforms with corresponding devices
- */
-void dumpAllDevices(const std::vector<cl::Platform>& pls, std::ostream& os) {
-  std::for_each(pls.cbegin(), pls.cend(), [&](const cl::Platform& p) {
-    os << p.getInfo<CL_PLATFORM_NAME>() << ": ";
-
-    std::vector<cl::Device> devs;
-    p.getDevices(CL_DEVICE_TYPE_ALL, &devs);
-    std::transform(
-        devs.cbegin(), devs.cend(), std::ostream_iterator<std::string>(os, " "),
-        [](const cl::Device& d) { return d.getInfo<CL_DEVICE_NAME>(); });
-    os << std::endl;
-  });
-}
-
-std::vector<cl::Platform> ClApplication::initPlatforms() {
+cl::Platform ClApplication::selectPlatform(const Config& config) {
   std::vector<cl::Platform> pls;
   cl::Platform::get(&pls);
   if (pls.empty()) {
     throw std::runtime_error("No OpenCL platforms were found");
   }
-  return pls;
-}
 
-cl::Platform ClApplication::selectPlatform(const std::vector<cl::Platform>& pls,
-                                           const Config& config) {
   cl::Platform res;
   if (config.platform_name.has_value()) {
     auto ehnd = [&]() {
