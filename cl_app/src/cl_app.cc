@@ -79,7 +79,7 @@ cl::Device ClApplication::selectDevice(const cl::Platform& pl,
 std::string ClApplication::loadShader(const std::filesystem::path& path) {
   auto code = std::string();
   auto shader_file = std::ifstream();
-  shader_file.open(path);
+  shader_file.open(path, std::ios::in | std::ios::binary);
   if (!shader_file.is_open()) {
     std::string what = std::string("Failed to open file ") + path.string();
     throw std::runtime_error(what);
