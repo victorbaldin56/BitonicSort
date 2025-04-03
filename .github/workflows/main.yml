@@ -22,9 +22,6 @@ jobs:
     - name: Install OpenCL
       run: sudo apt install pocl-opencl-icd
 
-    - name: Debug
-      run: clinfo
-
     - name: Setup env and install conan
       run: python3 -m venv .venv;
            source .venv/bin/activate;
