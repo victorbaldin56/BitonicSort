@@ -8,17 +8,25 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         build_type: [debug, release]
-    container: victorbaldin56/bitonic_sort:9555c9d3684cf182c389ad88e00bb1db97130884
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+
+    - name: Install OpenCL
+      run: sudo apt install pocl-opencl-icd g++-11 gcc-11
+
+    - name: Setup env and install conan
+      run: python3 -m venv .venv;
+           source .venv/bin/activate;
+           echo PATH=$PATH >> $GITHUB_ENV;
+           pip install conan==2.12.1;
 
     - name: Conan install
       run: |
@@ -33,3 +41,6 @@ jobs:
 
     - name: Build
       run: cmake --build build -j
+
+    - name: Test
+      run: cd build && ctest --output-on-failure -j

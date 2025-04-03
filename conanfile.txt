@@ -1,5 +1,5 @@
 [requires]
-opencl-clhpp-headers/2023.12.14
+opencl-icd-loader/2023.12.14
 benchmark/1.9.1
 
 [generators]
