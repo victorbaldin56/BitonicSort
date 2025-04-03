@@ -14,16 +14,22 @@ jobs:
       fail-fast: false
       matrix:
         build_type: [debug, release]
-    container:
-      image: victorbaldin56/bitonic_sort:710642974c8f5a900c398e31ba9b50dd61824ee8
-      options: --privileged
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
 
+    - name: Install OpenCL
+      run: sudo apt install pocl-opencl-icd
+
     - name: Debug
       run: clinfo
+
+    - name: Setup env and install conan
+      run: python3 -m venv .venv;
+           source .venv/bin/activate;
+           echo PATH=$PATH >> $GITHUB_ENV;
+           pip install conan==2.12.1;
 
     - name: Conan install
       run: |
