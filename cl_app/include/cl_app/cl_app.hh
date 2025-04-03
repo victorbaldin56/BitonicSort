@@ -1,9 +1,7 @@
 #pragma once
 
 #include <filesystem>
-#include <iostream>
-#include <iterator>
-#include <type_traits>
+#include <optional>
 
 #ifndef CL_HPP_TARGET_OPENCL_VERSION
 #define CL_HPP_MINIMUM_OPENCL_VERSION 120
