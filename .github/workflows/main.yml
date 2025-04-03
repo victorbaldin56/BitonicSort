@@ -14,7 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         build_type: [debug, release]
-    container: victorbaldin56/bitonic_sort:9555c9d3684cf182c389ad88e00bb1db97130884
+    container: victorbaldin56/bitonic_sort:4559453eaa374105a48623515dff8a197c2ef737
 
     steps:
     - name: Checkout
