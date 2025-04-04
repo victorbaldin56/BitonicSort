@@ -18,6 +18,9 @@ class BitonicSorter final {
   void sort(std::vector<int>& data) const;
 
  private:
+  void sortImpl(std::vector<int>& data, std::size_t orig_size) const;
+
+ private:
   cl_app::ClApplication app_;
 };
 
