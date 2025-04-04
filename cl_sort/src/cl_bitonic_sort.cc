@@ -48,14 +48,19 @@ BitonicSorter::BitonicSorter(const cl_app::Config& cfg)
 void BitonicSorter::sort(std::vector<int>& data) const {
   auto old_data_sz = data.size();
   prepareData(data);
-  auto new_data_sz = data.size();
-  assert((new_data_sz & (new_data_sz - 1)) == 0);
+  sortImpl(data, old_data_sz);
+  data.resize(old_data_sz);
+}
 
-  auto global_size = new_data_sz;
+void BitonicSorter::sortImpl(std::vector<int>& data,
+                             std::size_t orig_size) const {
+  auto sz = data.size();
+  assert((sz & (sz - 1)) == 0);
+
+  auto global_size = sz;
   auto local_size = std::min(global_size, kMaxLocalSize);
 
-  auto buffer =
-      app_.allocateBuffer(CL_MEM_READ_WRITE, sizeof(int) * new_data_sz);
+  auto buffer = app_.allocateBuffer(CL_MEM_READ_WRITE, sizeof(int) * sz);
   app_.copy(data.begin(), data.end(), buffer);
 
   auto local =
@@ -85,8 +90,7 @@ void BitonicSorter::sort(std::vector<int>& data) const {
 
   std::for_each(events.begin(), events.end(), [](auto& evt) { evt.wait(); });
 
-  app_.copy(buffer, data.begin(), data.begin() + old_data_sz);
-  data.resize(old_data_sz);
+  app_.copy(buffer, data.begin(), data.begin() + orig_size);
 }
 
 }  // namespace cl_sort
