@@ -5,11 +5,8 @@ def getAns(input_file):
   with open(input_file, "r") as infile:
     process = subprocess.run(
       [config.file_path + "/../../build/driver/driver"],
-      stdin=infile, text=True, capture_output=True
+      stdin=infile, text=True, capture_output=True, check=True
     )
-
-  if process.returncode != 0:
-    raise RuntimeError(f"Bitonic driver failed: {process.stderr}")
   return process.stdout.strip()
 
 def test(test_num):

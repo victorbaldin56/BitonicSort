@@ -12,15 +12,21 @@ namespace {
 constexpr std::size_t kMaxLocalSize = 0x100;
 
 template <typename Integer,
-          typename = std::enable_if_t<std::is_integral_v<Integer>>>
-constexpr Integer nextPowerOfTwo(Integer n) {
+          typename = std::enable_if_t<std::is_unsigned_v<Integer>>>
+constexpr auto nextPowerOfTwo(Integer n) {
   --n;
   n |= n >> 1;
   n |= n >> 2;
   n |= n >> 4;
-  if constexpr (sizeof(n) > 1) { n |= n >> 8;  }
-  if constexpr (sizeof(n) > 2) { n |= n >> 16; }
-  if constexpr (sizeof(n) > 4) { n |= n >> 32; }
+  if (sizeof(n) > 1) {
+    n |= n >> 8;
+  }
+  if (sizeof(n) > 2) {
+    n |= n >> 16;
+  }
+  if (sizeof(n) > 4) {
+    n |= n >> 32;
+  }
   ++n;
   return n;
 }

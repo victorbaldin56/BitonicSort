@@ -11,7 +11,7 @@ def generateRandomList():
 
 def generateInputFile(test_num):
   inp = generateRandomList()
-  input_str = str(len(inp)) + " " + " ".join([str(e) for e in inp])
+  input_str = f"{len(inp)} {' '.join([str(e) for e in inp])}"
   input_path = config.input_dir + f"test_{test_num + 1:02d}.in"
   with open(input_path, "w") as f:
     f.write(input_str)
