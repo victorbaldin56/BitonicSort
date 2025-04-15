@@ -52,7 +52,7 @@ class ClApplication final {
     return cl::Kernel(program_, kname.c_str());
   }
 
-  auto runKernel(const cl::Kernel& kernel, std::size_t global_size,
+  void runKernel(const cl::Kernel& kernel, std::size_t global_size,
                  std::size_t local_size, std::vector<cl::Event>& events) const {
     auto evt = cl::Event();
     queue_.enqueueNDRangeKernel(kernel, cl::NullRange, global_size, local_size,
